@@ -6,10 +6,10 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#e9ecf0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#24272d" media="(prefers-color-scheme: dark)">
-<title>{{.Title}} · OpenPak Courses</title>
+<title>{{.Title}} · OpenMaker</title>
 <meta name="description" content="{{.Desc}}">
 <link rel="canonical" href="{{.Canonical}}">
-<meta property="og:site_name" content="OpenPak Courses">
+<meta property="og:site_name" content="OpenMaker">
 <meta property="og:type" content="{{.OGType}}">
 <meta property="og:title" content="{{.Title}}">
 <meta property="og:description" content="{{.Desc}}">
@@ -17,14 +17,16 @@
 {{if .OGImage}}<meta property="og:image" content="{{.OGImage}}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="{{.OGImage}}">{{else}}<meta name="twitter:card" content="summary">{{end}}
-<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/static/openmaker.svg" type="image/svg+xml">
+<link rel="icon" href="/static/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 <link rel="stylesheet" href="/static/site.css?v={{.Asset}}">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="top">
   <div class="wrap">
-    <a href="/" class="brand"><img src="/static/icon.svg" alt="" width="28" height="28">OpenPak Courses</a>
+    <a href="/" class="brand"><img src="/static/openmaker.svg" alt="" width="32" height="32">OpenMaker</a>
     <nav aria-label="Main" class="navlinks">
       <a href="/" {{if eq .Path "/"}}aria-current="page"{{end}}>Home</a>
       <a href="/browse" {{if eq .Path "/browse"}}aria-current="page"{{end}}>Browse</a>
@@ -42,11 +44,34 @@
 <main id="main" class="wrap">
 {{template "content" .}}
 </main>
-<footer class="foot">
+{{$op := or .WebsiteURL "https://openpak.org"}}<footer class="site-foot">
   <div class="wrap">
-    <p>An unofficial fan site, not affiliated with or endorsed by Nintendo. Super Mario Maker and Super Mario Maker 2 are trademarks of Nintendo.
-    Super Mario Maker 2 maker codes shown here are OpenPak's own, not Nintendo's.</p>
-    <p>Part of <a href="https://openpak.org">OpenPak</a> · <a href="https://github.com/openpak/mario-maker">Source (AGPL-3.0-only)</a></p>
+    <div>
+      <a href="/" class="brand"><img src="/static/openmaker.svg" alt="" width="28" height="28">OpenMaker</a>
+      <p class="muted" style="max-width:24rem;font-size:.9rem;margin-top:.75rem">An open network for the consoles you already own. OpenMaker is OpenPak's own course site for Super Mario Maker on Wii U and Super Mario Maker 2 on Switch.</p>
+    </div>
+    <nav aria-labelledby="foot-net"><h2 id="foot-net">OpenPak</h2><ul>
+      <li><a href="{{$op}}/">Home</a></li>
+      <li><a href="{{$op}}/titles">Titles</a></li>
+      <li><a href="{{$op}}/features">Features</a></li>
+      <li><a href="{{$op}}/status">Status</a></li>
+    </ul></nav>
+    <nav aria-labelledby="foot-mk"><h2 id="foot-mk">OpenMaker</h2><ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/browse">Browse</a></li>
+      <li><a href="/browse?game=smm1">Super Mario Maker</a></li>
+      <li><a href="/browse?game=smm2">Super Mario Maker 2</a></li>
+    </ul></nav>
+    <nav aria-labelledby="foot-proj"><h2 id="foot-proj">Project</h2><ul>
+      <li><a href="https://github.com/openpak/mario-maker" rel="noopener">Source</a></li>
+      <li><a href="{{$op}}/help">Help</a></li>
+    </ul></nav>
+    <nav aria-labelledby="foot-legal"><h2 id="foot-legal">Legal</h2><ul>
+      <li><a href="{{$op}}/terms">Terms</a></li>
+      <li><a href="{{$op}}/privacy">Privacy</a></li>
+      <li><a href="{{$op}}/legal">Trademarks and takedowns</a></li>
+    </ul></nav>
+    <div class="foot-bottom"><span>© OpenPak · AGPL-3.0 · Super Mario Maker is a trademark of Nintendo.</span></div>
   </div>
 </footer>
 </body>

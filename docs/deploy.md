@@ -8,7 +8,7 @@ Nothing else builds the image.
 
 1. A Postgres database `mario_maker` and a role that owns it. The service creates its own tables.
 2. The read APIs of the two titles reachable from the container (api-contract.md), and their keys.
-3. A router for the public host (for example `mario-maker.openpak.org`) to the container port.
+3. A router for the public host (for example `openmaker.openpak.org`) to the container port.
 
 ## Run
 

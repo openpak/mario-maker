@@ -1,4 +1,4 @@
-/* OpenPak Courses. Tokens are copied from the OpenPak website's input.css (the
+/* OpenMaker. Tokens are copied from the OpenPak website's input.css (the
    "console system UI" palette): paper is the shell, raised a tile, the cyan cursor
    marks only hover, focus and the current item, indigo is for links and primary
    actions. No gradients. Light and dark follow the reader's system setting. */
@@ -134,6 +134,14 @@ code.copy:hover { border-color: var(--cursor); }
 .facts.card { margin-bottom: 1rem; }
 
 /* Footer */
-.foot { border-top: 1px solid var(--line); color: var(--muted); font-size: .88rem; padding: 1.25rem 0 2rem; }
-.foot p { margin: .25rem 0; max-width: 52rem; }
-.foot a { color: var(--accent); }
+.site-foot { border-top: 1px solid var(--line); margin-top: 72px; }
+.site-foot .wrap { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 16px; padding-top: 44px; padding-bottom: 36px; }
+.site-foot .wrap > :first-child { grid-column: 1 / -1; }
+@media (min-width: 48rem) { .site-foot .wrap { grid-template-columns: 1.6fr repeat(4, minmax(0, 1fr)); } .site-foot .wrap > :first-child { grid-column: auto; } }
+.site-foot h2 { margin: 0 0 12px; font-family: var(--font-ui); font-size: .9rem; font-weight: 800; color: var(--ink); }
+.site-foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.site-foot a { color: var(--ink-2); text-decoration: none; font-size: .93rem; }
+.site-foot a:hover { color: var(--ink); text-decoration: underline; }
+.site-foot .brand { color: var(--ink); font-size: 1.15rem; }
+.site-foot .muted { color: var(--muted); }
+.foot-bottom { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 22px; border-top: 1px solid var(--line); font-size: .86rem; color: var(--muted); }
