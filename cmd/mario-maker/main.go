@@ -87,8 +87,10 @@ func run(log *slog.Logger) error {
 	mb, _ := strconv.Atoi(env("MARIO_MAKER_THUMB_CACHE_MB", "64"))
 	srv, err := web.New(web.Config{
 		Store: st, Upstream: clients,
-		Auth: auth.New(os.Getenv("MARIO_MAKER_CORE_BASE_URL"), os.Getenv("MARIO_MAKER_SESSION_COOKIE")),
-		Link: linkResolver(), SessionCookie: env("MARIO_MAKER_SESSION_COOKIE", "opak_session"), CSRFSecret: os.Getenv("MARIO_MAKER_CSRF_SECRET"),
+		Auth: auth.New(auth.Config{PublicURL: os.Getenv("MARIO_MAKER_PUBLIC_URL"), OpenPakURL: os.Getenv("MARIO_MAKER_WEBSITE_URL"),
+			InternalURL: os.Getenv("MARIO_MAKER_SSO_URL"), Secret: os.Getenv("SSO_CLIENT_OPENMAKER_SECRET"),
+			SessionKey: os.Getenv("MARIO_MAKER_SESSION_KEY"), Log: log}),
+		Link: linkResolver(), SessionCookie: auth.CookieName, CSRFSecret: os.Getenv("MARIO_MAKER_CSRF_SECRET"),
 		PublicURL:  os.Getenv("MARIO_MAKER_PUBLIC_URL"),
 		WebsiteURL: os.Getenv("MARIO_MAKER_WEBSITE_URL"),
 		CacheDir:   os.Getenv("MARIO_MAKER_CACHE_DIR"), CacheMB: mb, Log: log,

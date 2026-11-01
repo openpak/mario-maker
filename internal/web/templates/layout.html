@@ -36,8 +36,9 @@
       <input id="hq" class="field" type="search" name="q" placeholder="Name, tag or course ID" maxlength="100">
     </form>
     {{if .AuthOn}}<div class="who">
-      {{if .User}}{{if .WebsiteURL}}<a class="btn ghost" href="{{.WebsiteURL}}/account" title="Your OpenPak account">{{.User.Name}}</a>{{else}}<span class="btn ghost">{{.User.Name}}</span>{{end}}
-      {{else if .WebsiteURL}}<a class="btn" href="{{.WebsiteURL}}/login">Sign in</a>{{end}}
+      {{if .User}}<a class="btn ghost" href="/auth/logout">Sign out</a>
+      <a class="avatar-btn" href="{{or .WebsiteURL "https://openpak.org"}}/account" aria-label="Your account" title="{{.User.Name}}">{{.User.Initial}}</a>
+      {{else}}<a class="btn ghost" href="/auth/login?next={{.Path}}">Sign in</a>{{end}}
     </div>{{end}}
   </div>
 </header>

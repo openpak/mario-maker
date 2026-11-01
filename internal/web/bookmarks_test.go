@@ -76,20 +76,13 @@ func TestWebBookmarks(t *testing.T) {
 	ts := httptest.NewServer(title)
 	defer ts.Close()
 
-	core := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		c, err := r.Cookie("openpak_session")
-		switch {
-		case err != nil:
-			http.Error(w, "no", http.StatusUnauthorized)
-		case c.Value == "linked":
-			io.WriteString(w, `{"account_id":"a1","display_name":"Tobi"}`)
-		case c.Value == "unlinked":
-			io.WriteString(w, `{"account_id":"a2","display_name":"Nobody"}`)
-		default:
-			http.Error(w, "no", http.StatusUnauthorized)
-		}
-	}))
-	defer core.Close()
+	au := auth.New(auth.Config{PublicURL: "https://maker.test", InternalURL: "http://unused.test", Secret: "s", SessionKey: strings.Repeat("k", 32)})
+	sessions := map[string]string{
+		"linked":   au.SessionCookie(auth.User{ID: "a1", DisplayName: "Tobi"}).String(),
+		"unlinked": au.SessionCookie(auth.User{ID: "a2", DisplayName: "Nobody"}).String(),
+		"stale":    auth.CookieName + "=forged",
+	}
+	ck := func(name string) string { return sessions[name] }
 	links := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("X-Internal-Key") != "lk" {
 			http.Error(w, "no", http.StatusUnauthorized)
@@ -107,7 +100,7 @@ func TestWebBookmarks(t *testing.T) {
 	populate(t, st)
 	srv, err := web.New(web.Config{
 		Store: st, Upstream: map[string]*upstream.Client{"smm1": upstream.New("smm1", ts.URL, "k")},
-		Auth: auth.New(core.URL, ""), Link: link.New(links.URL, "lk"), SessionCookie: "opak_session", CSRFSecret: "test-secret",
+		Auth: au, Link: link.New(links.URL, "lk"), SessionCookie: auth.CookieName, CSRFSecret: "test-secret",
 		Log: slog.New(slog.DiscardHandler),
 	})
 	if err != nil {
@@ -120,15 +113,15 @@ func TestWebBookmarks(t *testing.T) {
 	if _, body, _ := get(h, course); !strings.Contains(body, "Sign in with your OpenPak account to bookmark") {
 		t.Error("anonymous hint missing")
 	}
-	if _, body, _ := get(h, "/course/smm2/ABC-DEF-GH1", "Cookie", "opak_session=linked"); strings.Contains(body, "ookmark") {
+	if _, body, _ := get(h, "/course/smm2/ABC-DEF-GH1", "Cookie", ck("linked")); strings.Contains(body, "ookmark") {
 		t.Error("the Switch game has no bookmark control")
 	}
-	if _, body, _ := get(h, course, "Cookie", "opak_session=unlinked"); !strings.Contains(body, "Link your Wii U Network ID") || strings.Contains(body, `action="/bookmark/`) {
+	if _, body, _ := get(h, course, "Cookie", ck("unlinked")); !strings.Contains(body, "Link your Wii U Network ID") || strings.Contains(body, `action="/bookmark/`) {
 		t.Error("unlinked account must be told to link, with no form")
 	}
 
 	// * Linked: a form with a token
-	_, body, _ := get(h, course, "Cookie", "opak_session=linked")
+	_, body, _ := get(h, course, "Cookie", ck("linked"))
 	m := regexp.MustCompile(`name="csrf" value="([0-9a-f]+)"`).FindStringSubmatch(body)
 	if m == nil || !strings.Contains(body, `action="/bookmark/smm1/0123456789ABCDEF"`) {
 		t.Fatalf("no bookmark form:\n%s", body)
@@ -136,7 +129,7 @@ func TestWebBookmarks(t *testing.T) {
 	post := func(path, token, cookie string) *httptest.ResponseRecorder {
 		req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(url.Values{"csrf": {token}}.Encode()))
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		req.Header.Set("Cookie", "opak_session="+cookie)
+		req.Header.Set("Cookie", ck(cookie))
 		rec := httptest.NewRecorder()
 		h.ServeHTTP(rec, req)
 		return rec
@@ -165,16 +158,16 @@ func TestWebBookmarks(t *testing.T) {
 	}
 
 	// * Now it shows as saved, and in the list
-	if _, body, _ := get(h, course, "Cookie", "opak_session=linked"); !strings.Contains(body, `action="/unbookmark/smm1/0123456789ABCDEF"`) {
+	if _, body, _ := get(h, course, "Cookie", ck("linked")); !strings.Contains(body, `action="/unbookmark/smm1/0123456789ABCDEF"`) {
 		t.Error("saved state missing")
 	}
-	if _, body, _ := get(h, "/bookmarks", "Cookie", "opak_session=linked"); !strings.Contains(body, "Marked") {
+	if _, body, _ := get(h, "/bookmarks", "Cookie", ck("linked")); !strings.Contains(body, "Marked") {
 		t.Errorf("list: %s", body)
 	}
 	if rec := post("/unbookmark/smm1/0123456789ABCDEF", m[1], "linked"); rec.Code != http.StatusSeeOther || len(title.marks["wiiuplayer"]) != 0 {
 		t.Errorf("unbookmark: %d %v", rec.Code, title.marks)
 	}
-	if _, body, _ := get(h, "/bookmarks", "Cookie", "opak_session=unlinked"); !strings.Contains(body, "Link your Wii U") {
+	if _, body, _ := get(h, "/bookmarks", "Cookie", ck("unlinked")); !strings.Contains(body, "Link your Wii U") {
 		t.Error("list for unlinked account")
 	}
 }

@@ -2,7 +2,6 @@ package web_test
 
 import (
 	"context"
-	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -19,7 +18,7 @@ import (
 	"github.com/openpak/mario-maker/internal/web"
 )
 
-func newServer(t *testing.T, st *store.Store, ups map[string]*upstream.Client, au *auth.Client, cacheDir string) http.Handler {
+func newServer(t *testing.T, st *store.Store, ups map[string]*upstream.Client, au *auth.Auth, cacheDir string) http.Handler {
 	t.Helper()
 	s, err := web.New(web.Config{Store: st, Upstream: ups, Auth: au, WebsiteURL: "https://openpak.example", CacheDir: cacheDir,
 		Log: slog.New(slog.DiscardHandler), PublicURL: "https://courses.example"})
@@ -190,29 +189,37 @@ func TestThumbProxy(t *testing.T) {
 }
 
 func TestSignInDisplay(t *testing.T) {
-	core := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if c, err := r.Cookie("openpak_session"); r.URL.Path != "/v1/whoami" || err != nil || c.Value != "good" {
-			http.Error(w, "no", http.StatusUnauthorized)
-			return
-		}
-		io.WriteString(w, `{"account_id":"a1","display_name":"Tobi","handle":"tobi"}`)
-	}))
-	defer core.Close()
+	au := auth.New(auth.Config{PublicURL: "https://maker.test", InternalURL: "http://unused.test", Secret: "s", SessionKey: strings.Repeat("k", 32)})
 	st := testutil.DB(t)
-	h := newServer(t, st, nil, auth.New(core.URL, ""), "")
+	h := newServer(t, st, nil, au, "")
 
-	if _, body, _ := get(h, "/"); !strings.Contains(body, "https://openpak.example/login") || strings.Contains(body, "Tobi") {
+	// Signed out: the same Sign in button as openpak.org, pointing at this site's own login route, and no form of its own.
+	_, body, _ := get(h, "/browse")
+	if !strings.Contains(body, `class="btn ghost" href="/auth/login?next=%2fbrowse"`) || strings.Contains(body, "Tobi") || strings.Contains(body, "openpak.example/login") {
 		t.Error("anonymous header")
 	}
-	_, body, hd := get(h, "/", "Cookie", "opak_session=good")
-	if !strings.Contains(body, "Tobi") || strings.Contains(body, ">Sign in<") || !strings.Contains(hd.Get("Cache-Control"), "no-store") {
+	if strings.Contains(body, `type="password"`) || strings.Contains(body, `action="/auth`) || strings.Contains(body, `action="/login`) {
+		t.Error("the site must have no sign-in form")
+	}
+	// Signed in: Sign out link and the account chip carrying the name.
+	cookie := au.SessionCookie(auth.User{ID: "a1", DisplayName: "Tobi"}).String()
+	_, body, hd := get(h, "/", "Cookie", cookie)
+	if !strings.Contains(body, `href="/auth/logout"`) || !strings.Contains(body, `class="avatar-btn"`) || !strings.Contains(body, `title="Tobi"`) ||
+		strings.Contains(body, ">Sign in<") || !strings.Contains(hd.Get("Cache-Control"), "no-store") {
 		t.Error("signed-in header")
 	}
-	if _, body, _ := get(h, "/", "Cookie", "opak_session=stale"); strings.Contains(body, "Tobi") || !strings.Contains(body, "Sign in") {
-		t.Error("stale session shown as signed in")
+	if _, body, _ := get(h, "/", "Cookie", auth.CookieName+"=forged"); strings.Contains(body, "Tobi") || !strings.Contains(body, "Sign in") {
+		t.Error("forged session shown as signed in")
 	}
-	// Disabled: no sign-in UI at all.
-	if _, body, _ := get(newServer(t, st, nil, nil, ""), "/"); strings.Contains(body, "Sign in") {
+	if !strings.Contains(body, "Part of the OpenPak network") {
+		t.Error("footer line missing")
+	}
+	// Disabled: no sign-in UI and no auth routes.
+	h2 := newServer(t, st, nil, nil, "")
+	if _, body, _ := get(h2, "/"); strings.Contains(body, "Sign in") {
 		t.Error("sign-in shown while disabled")
+	}
+	if code, _, _ := get(h2, "/auth/login"); code != 404 {
+		t.Errorf("/auth/login while disabled: %d", code)
 	}
 }

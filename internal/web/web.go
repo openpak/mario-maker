@@ -43,9 +43,9 @@ var idRe = regexp.MustCompile(`^[0-9A-Za-z_-]{1,40}$`)
 type Config struct {
 	Store         *store.Store
 	Upstream      map[string]*upstream.Client // by game; missing games have no thumbnails
-	Auth          *auth.Client                // nil when sign-in display is off
+	Auth          *auth.Auth                  // nil when sign-in is off
 	Link          link.Resolver               // OpenPak account -> Wii U NNID; nil turns web bookmarking off
-	SessionCookie string                      // the website's session cookie name (also keys the bookmark CSRF token)
+	SessionCookie string                      // this site's session cookie name (auth.CookieName; also keys the bookmark CSRF token)
 	CSRFSecret    string                      // optional fixed key for bookmark tokens; random per start when empty
 	PublicURL     string                      // absolute base for OG tags; derived from the request when empty
 	WebsiteURL    string                      // openpak.org, for the sign-in and account links
@@ -114,6 +114,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /maker/{game}/{id}", s.maker)
 	mux.HandleFunc("GET /thumb/{game}/{file}", s.thumb)
 	s.bookmarkRoutes(mux)
+	s.cfg.Auth.Routes(mux, s.signInFailed)
 	mux.HandleFunc("GET /robots.txt", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		fmt.Fprint(w, "User-agent: *\nAllow: /\n")
@@ -188,6 +189,11 @@ func (s *Server) render(w http.ResponseWriter, r *http.Request, name string, sta
 	}
 	w.WriteHeader(status)
 	fmt.Fprint(w, sb.String())
+}
+
+// signInFailed is the page for a sign-in that did not finish (bad state, or the code was refused).
+func (s *Server) signInFailed(w http.ResponseWriter, r *http.Request, status int) {
+	s.render(w, r, "error", status, page{Title: "Sign-in", Data: "Signing in did not finish. Go back and press Sign in to try again."})
 }
 
 func (s *Server) notFound(w http.ResponseWriter, r *http.Request, what string) {

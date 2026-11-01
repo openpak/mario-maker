@@ -1,5 +1,10 @@
 # Changelog: mario-maker
 
+## v0.2.0 — 2026-11-01
+
+- Sign-in through openpak.org single sign-on (`/auth/login`, `/auth/callback`, `/auth/logout`; state and PKCE, server-side code exchange, the site's own signed session cookie). Replaces the old session lookup that could never see openpak.org's cookie on this host. The header has the same Sign in button and account chip as openpak.org; the site has no sign-in form
+- New settings: `MARIO_MAKER_SSO_URL`, `SSO_CLIENT_OPENMAKER_SECRET`, `MARIO_MAKER_SESSION_KEY`. Removed: `MARIO_MAKER_CORE_BASE_URL`, `MARIO_MAKER_SESSION_COOKIE`
+
 ## v0.1.2
 
 - Address is maker.openpak.org.
