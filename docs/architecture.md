@@ -38,7 +38,7 @@ contract is `docs/sso.md` in the website repo). `/auth/login` stores a random st
 signed cookie and redirects to `https://openpak.org/account/sso/authorize`; `/auth/callback` checks the state, swaps the
 one-minute code at `POST $MARIO_MAKER_SSO_URL/internal/sso/token` (HTTP Basic `openmaker:<secret>`), and sets the site's
 own signed session cookie `openmaker_session` (account id, display name, Wii U PID; HttpOnly, Secure, SameSite=Lax, seven
-days); `/auth/logout` clears it and goes through `https://openpak.org/account/sso/logout`. The header shows openpak.org's
+days); `GET /auth/logout` clears it and redirects (303) to `/`; openpak.org stays signed in. The header shows openpak.org's
 "Sign in" button, or "Sign out" and the account chip. Needs `MARIO_MAKER_PUBLIC_URL` (`https://maker.openpak.org`, the
 only registered redirect origin), `MARIO_MAKER_SSO_URL`, `SSO_CLIENT_OPENMAKER_SECRET` and `MARIO_MAKER_SESSION_KEY`
 (32+ random characters); with any missing, sign-in is off and no sign-in UI or route exists. Pages for signed-in

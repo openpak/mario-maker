@@ -260,15 +260,10 @@ func (a *Auth) exchange(ctx context.Context, code, verifier string) (session, er
 	return s, nil
 }
 
-// logout ends this site's session, then hands the browser to openpak.org, which asks before it
-// ends its own and sends the person back here.
+// logout ends this site's session only and returns to the home page. openpak.org stays signed
+// in, like leaving one Google app; the next Sign in may sign straight back in.
 func (a *Auth) logout(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
-	was := a.User(r) != nil
 	a.setCookie(w, CookieName, "", "/", -1)
-	if !was {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-	http.Redirect(w, r, a.cfg.OpenPakURL+"/account/sso/logout?redirect_uri="+url.QueryEscape(a.cfg.PublicURL+"/"), http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

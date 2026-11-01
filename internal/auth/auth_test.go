@@ -129,9 +129,9 @@ func TestCallbackHappyPath(t *testing.T) {
 	if a.User(r) != nil {
 		t.Error("forged session accepted")
 	}
-	// Sign out clears the site session and goes through openpak.org.
+	// Sign out clears only the site session and returns home; openpak.org is never visited.
 	out := do(mux, "/auth/logout", sess)
-	if out.Code != 303 || out.Header().Get("Location") != "https://openpak.org/account/sso/logout?redirect_uri=https%3A%2F%2Fmaker.test%2F" {
+	if out.Code != 303 || out.Header().Get("Location") != "/" {
 		t.Errorf("logout: %d %s", out.Code, out.Header().Get("Location"))
 	}
 	if c := cookieNamed(out, CookieName); c == nil || c.MaxAge >= 0 {

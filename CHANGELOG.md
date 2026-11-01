@@ -1,5 +1,9 @@
 # Changelog: mario-maker
 
+## v0.2.1 — 2026-11-01
+
+- Sign out ends only this site's session and returns to the home page; it no longer goes through openpak.org's "Sign out of OpenPak?" page, and openpak.org stays signed in. The next Sign in may sign straight back in while openpak.org is signed in
+
 ## v0.2.0 — 2026-11-01
 
 - Sign-in through openpak.org single sign-on (`/auth/login`, `/auth/callback`, `/auth/logout`; state and PKCE, server-side code exchange, the site's own signed session cookie). Replaces the old session lookup that could never see openpak.org's cookie on this host. The header has the same Sign in button and account chip as openpak.org; the site has no sign-in form
