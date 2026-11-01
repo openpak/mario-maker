@@ -1,0 +1,5 @@
+# Binary course files are reproducible: coursegen generate -out courses
+courses/*/*.cdt
+courses/*/*.tnl
+courses/*/*.bwv
+courses/*/*.png
