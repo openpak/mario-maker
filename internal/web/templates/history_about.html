@@ -20,7 +20,7 @@
   <p>If you made a course, find your maker page and press “This is mine”. If your OpenPak account is linked to the same Wii U Network ID, the claim is accepted at once and the page shows “Claimed by” with your name. If no link exists yet, a moderator checks the claim.</p>
 
   <h2 id="remove">Remove this</h2>
-  <p>You can ask for any course or maker to be removed. <a href="/history/takedown">Send a removal request</a>. The entry is hidden the moment you send it. Takedowns are honoured within 48 hours. You can also write to <a href="mailto:{{$.Takedown}}">{{$.Takedown}}</a>.</p>
+  <p>You can ask for any course or maker to be removed. <a href="/history/takedown">Send a removal request</a>. The entry is hidden the moment you send it. Takedowns are honoured within 48 hours. You can also write to {{mailto $.Takedown}}.</p>
 </div>
 {{template "histactions" (act "course" "" "#mine")}}
 {{end}}{{end}}

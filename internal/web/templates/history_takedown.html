@@ -23,7 +23,7 @@
   <div><label for="contact">How we can reach you (email or other)</label><input id="contact" class="field" name="contact" value="{{.Contact}}" maxlength="200" required autocomplete="email"></div>
   <div><label for="reason">Reason (optional)</label><textarea id="reason" class="field" name="reason" rows="4" maxlength="2000">{{.Reason}}</textarea></div>
   <div class="hp" aria-hidden="true"><label for="website">Leave this empty</label><input id="website" class="field" name="website" tabindex="-1" autocomplete="off"></div>
-  <p class="hint">You can also write to <a href="mailto:{{.Email}}">{{.Email}}</a>.</p>
+  <p class="hint">You can also write to {{mailto .Email}}.</p>
   <div><button class="btn primary" type="submit">Hide it and send the request</button></div>
 </form>
 {{end}}

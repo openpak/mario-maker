@@ -30,7 +30,7 @@
   </form>
   {{else if eq .State "signin"}}<p>Sign in with your OpenPak account to claim this Network ID.</p>
   <p><a class="btn primary" href="/auth/login?next=/history/maker/{{$m.ID}}">Sign in to claim</a></p>
-  {{else}}<p>To claim this profile, write to <a href="mailto:{{$.Takedown}}">{{$.Takedown}}</a> with your Network ID.</p>{{end}}
+  {{else}}<p>To claim this profile, write to {{mailto $.Takedown}} with your Network ID.</p>{{end}}
   {{end}}
 </section>
 {{template "histactions" (act "maker" $m.ID "#claim")}}

@@ -140,10 +140,13 @@ func TestHistoryPages(t *testing.T) {
 
 	// about page: credits and licences
 	_, body, _ = get(h, "/history/about")
-	for _, want := range []string{"tachyo", "Open Database License", "CC BY 4.0", "LDNOOBW", "English", "Japanese", "Spanish", "French", "German", "within 48 hours", "takedown@openpak.org"} {
+	for _, want := range []string{"tachyo", "Open Database License", "CC BY 4.0", "LDNOOBW", "English", "Japanese", "Spanish", "French", "German", "within 48 hours", "takedown&#64;openpak.org"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("about missing %q", want)
 		}
+	}
+	if strings.Contains(body, "takedown@openpak.org") {
+		t.Error("the address must be entity-encoded so Cloudflare does not obfuscate it")
 	}
 	// live pages are untouched, nav shows History
 	if _, body, _ = get(h, "/browse"); !strings.Contains(body, `<a href="/history" >History</a>`) && !strings.Contains(body, ">History</a>") {
@@ -159,7 +162,7 @@ func TestTakedownFlow(t *testing.T) {
 	h := historyServer(t, st, nil, nil, "")
 
 	code, body, _ := get(h, "/history/takedown?kind=maker&id=mia_99")
-	for _, want := range []string{"honoured within 48 hours", "takedown@openpak.org", `value="mia_99"`, `<option value="maker" selected>`, "Your name"} {
+	for _, want := range []string{"honoured within 48 hours", "takedown&#64;openpak.org", `value="mia_99"`, `<option value="maker" selected>`, "Your name"} {
 		if code != 200 || !strings.Contains(body, want) {
 			t.Errorf("form missing %q", want)
 		}
@@ -244,7 +247,7 @@ func TestAdminArchive(t *testing.T) {
 	}
 	post(h, "/history/takedown", url.Values{"kind": {"course"}, "id": {"AAAA-0000-0000-0001"}, "name": {"Mia"}, "contact": {"m@example.org"}})
 	code, body, _ := get(h, "/admin/archive", "Authorization", basic("adm-key"))
-	if code != 200 || !strings.Contains(body, "Takedown requests") || !strings.Contains(body, "m@example.org") || !strings.Contains(body, "Sky Castle") || !strings.Contains(body, "Override list") {
+	if code != 200 || !strings.Contains(body, "Takedown requests") || !strings.Contains(body, "m&#64;example.org") || !strings.Contains(body, "Sky Castle") || !strings.Contains(body, "Override list") {
 		t.Fatalf("admin page: %d", code)
 	}
 	csrf := regexp.MustCompile(`name="csrf" value="([0-9a-f]+)"`).FindStringSubmatch(body)[1]

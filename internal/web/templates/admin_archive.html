@@ -8,8 +8,8 @@
 {{range .Takedowns}}<tr>
   <td>{{.ID}}<br><span class="hint">{{stamp .CreatedAt}}</span></td>
   <td>{{.Kind}} <code>{{.Target}}</code><br>{{if .TargetName}}{{.TargetName}}{{else}}<span class="hint">not in the archive</span>{{end}}</td>
-  <td>{{.Name}}<br><span class="hint">{{.Contact}}</span></td>
-  <td class="reason">{{.Reason}}</td>
+  <td>{{noat .Name}}<br><span class="hint">{{noat .Contact}}</span></td>
+  <td class="reason">{{noat .Reason}}</td>
   <td>{{.Status}}</td>
   <td><form method="post" action="/admin/archive" class="inline"><input type="hidden" name="csrf" value="{{$csrf}}"><input type="hidden" name="id" value="{{.ID}}">
     {{if ne .Status "approved"}}<button class="btn" name="action" value="takedown-approve">Keep hidden</button>{{end}}
@@ -21,7 +21,7 @@
 {{if .Claims}}<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Maker</th><th>Account</th><th>Wii U PID</th><th>Linked ID</th><th>Status</th><th></th></tr></thead><tbody>
 {{range .Claims}}<tr>
   <td><code>{{.MakerID}}</code><br><span class="hint">{{stamp .CreatedAt}}</span></td>
-  <td>{{.AccountName}}<br><span class="hint">{{.AccountID}}</span>{{if .Note}}<br>{{.Note}}{{end}}</td>
+  <td>{{.AccountName}}<br><span class="hint">{{.AccountID}}</span>{{if .Note}}<br>{{noat .Note}}{{end}}</td>
   <td>{{if .WiiUPID}}{{.WiiUPID}}{{end}}</td>
   <td>{{.LinkedNNID}}</td>
   <td>{{.Status}}{{if eq .Status "approved"}} ({{.Via}}){{end}}</td>

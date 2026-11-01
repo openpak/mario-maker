@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
 	"html/template"
 	"io/fs"
 	"log/slog"
@@ -100,6 +101,13 @@ func New(cfg Config) (*Server, error) {
 			}
 			return fmtRate(c.ClearRate)
 		},
+		"mailto": func(addr string) template.HTML { // "@" as an entity: Cloudflare's address obfuscation needs JavaScript the CSP blocks
+			e := strings.ReplaceAll(html.EscapeString(addr), "@", "&#64;")
+			return template.HTML(`<a href="mailto:` + e + `">` + e + `</a>`)
+		},
+		"noat": func(v string) template.HTML {
+			return template.HTML(strings.ReplaceAll(html.EscapeString(v), "@", "&#64;"))
+		}, // keeps contact addresses readable past Cloudflare's obfuscation
 		"hasPrefix": strings.HasPrefix,
 		"stamp":     func(t time.Time) string { return t.UTC().Format("2 Jan 2006 15:04 UTC") },
 	}

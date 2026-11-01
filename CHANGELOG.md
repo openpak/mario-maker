@@ -4,6 +4,10 @@
 
 - `tools/coursegen`: generator, validator and review folder for about 60 OpenPak starter courses for Super Mario Maker (Wii U). Not part of the site binary. The files are not verified in the game and the DataStore import is off by default; see `tools/coursegen/README.md`
 
+## v0.3.1 — 2026-11-01
+
+- The takedown contact address was unreadable behind Cloudflare's address obfuscation (it needs JavaScript, which the site's content policy blocks). Addresses are now written so they stay plain text, on the pages and in the admin list
+
 ## v0.3.0 — 2026-11-01
 
 - New History section (`/history`): archived Wii U Super Mario Maker course details from tachyo's 2018 scrape (archive.org `tachyo_SMMData`, ODbL), browse-only and credited to the makers. Browse and search by name, maker, course code, game style and year; sort by stars, plays or clear rate. Course and maker pages, an About page with the licences and credits, and "This is mine" and "Remove this" on every page. Country is never imported or shown

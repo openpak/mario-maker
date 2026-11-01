@@ -285,7 +285,7 @@ func (s *Server) historyClaim(w http.ResponseWriter, r *http.Request) {
 	}
 	if _, err := s.cfg.Store.AddClaim(r.Context(), k); errors.Is(err, store.ErrClaimTaken) {
 		s.render(w, r, "error", http.StatusConflict, page{Title: "Already claimed",
-			Data: "Someone has already claimed this maker. If that is a mistake, use Remove this on the maker page or write to " + s.cfg.TakedownEmail + "."})
+			Data: "Someone has already claimed this maker. If that is a mistake, use Remove this on the maker page or ask for its removal on the maker page."})
 		return
 	} else if err != nil {
 		s.fail(w, r, err)
@@ -347,7 +347,7 @@ func (s *Server) takedownSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !s.limit.allow(clientIP(r)) {
-		show(http.StatusTooManyRequests, "Too many requests from your network just now. Try again later, or write to "+s.cfg.TakedownEmail+".")
+		show(http.StatusTooManyRequests, "Too many requests from your network just now. Try again later, or use the address on the About page.")
 		return
 	}
 	id, found, err := s.cfg.Store.AddTakedown(r.Context(), store.Takedown{Kind: d.Kind, Target: d.ID, Name: d.Name, Contact: d.Contact, Reason: d.Reason})
