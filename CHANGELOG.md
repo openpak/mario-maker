@@ -1,7 +1,9 @@
 # Changelog: mario-maker
 
-## Unreleased
+## v0.1.1
 
+- Named OpenMaker (openmaker.openpak.org), with the OpenMaker mark and the shared Open site header and footer.
+- Release fix: v0.1.0 failed its tests in CI (the notice moved into the footer) and published no image.
 - Bookmarks for Super Mario Maker (Wii U): a signed-in player with a linked Network ID bookmarks a course from its
   page (`POST /bookmark/smm1/{id}`, CSRF token tied to the session) and sees the list at `/bookmarks`; the list
   lives in the title. Off unless `MARIO_MAKER_LINK_URL` is set. See docs/api-contract.md.
