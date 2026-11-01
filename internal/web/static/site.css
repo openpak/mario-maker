@@ -184,3 +184,4 @@ select.field { appearance: auto; }
 .tbl .reason { max-width: 20rem; overflow-wrap: anywhere; white-space: pre-line; }
 form.inline { display: flex; flex-wrap: wrap; gap: .4rem; }
 form.inline .btn { min-height: 36px; padding: 0 .8rem; font-size: .85rem; }
+.addr { font-weight: 700; user-select: all; overflow-wrap: anywhere; }

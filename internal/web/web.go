@@ -101,9 +101,10 @@ func New(cfg Config) (*Server, error) {
 			}
 			return fmtRate(c.ClearRate)
 		},
-		"mailto": func(addr string) template.HTML { // "@" as an entity: Cloudflare's address obfuscation needs JavaScript the CSP blocks
-			e := strings.ReplaceAll(html.EscapeString(addr), "@", "&#64;")
-			return template.HTML(`<a href="mailto:` + e + `">` + e + `</a>`)
+		// Plain text, "@" as an entity, no mailto link: Cloudflare's address obfuscation rewrites mailto links and needs
+		// JavaScript to undo it, which the CSP blocks.
+		"mailto": func(addr string) template.HTML {
+			return template.HTML(`<span class="addr">` + strings.ReplaceAll(html.EscapeString(addr), "@", "&#64;") + `</span>`)
 		},
 		"noat": func(v string) template.HTML {
 			return template.HTML(strings.ReplaceAll(html.EscapeString(v), "@", "&#64;"))
