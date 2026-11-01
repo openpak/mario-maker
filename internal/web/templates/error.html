@@ -1,0 +1,5 @@
+{{define "content"}}
+<div class="page-head"><h1>{{.Title}}</h1></div>
+<div class="notice"><p>{{if eq .Title "Not found"}}{{.Data}} is not here. It may have been removed, or the link is wrong.{{else}}{{.Data}}{{end}}</p>
+<p class="actions"><a class="btn primary" href="/browse">Browse courses</a></p></div>
+{{end}}

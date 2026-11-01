@@ -1,0 +1,62 @@
+{{define "page"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#e9ecf0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#24272d" media="(prefers-color-scheme: dark)">
+<title>{{.Title}} · OpenPak Courses</title>
+<meta name="description" content="{{.Desc}}">
+<link rel="canonical" href="{{.Canonical}}">
+<meta property="og:site_name" content="OpenPak Courses">
+<meta property="og:type" content="{{.OGType}}">
+<meta property="og:title" content="{{.Title}}">
+<meta property="og:description" content="{{.Desc}}">
+<meta property="og:url" content="{{.Canonical}}">
+{{if .OGImage}}<meta property="og:image" content="{{.OGImage}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{{.OGImage}}">{{else}}<meta name="twitter:card" content="summary">{{end}}
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/site.css?v={{.Asset}}">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap">
+    <a href="/" class="brand"><img src="/static/icon.svg" alt="" width="28" height="28">OpenPak Courses</a>
+    <nav aria-label="Main" class="navlinks">
+      <a href="/" {{if eq .Path "/"}}aria-current="page"{{end}}>Home</a>
+      <a href="/browse" {{if eq .Path "/browse"}}aria-current="page"{{end}}>Browse</a>
+    </nav>
+    <form class="search" action="/browse" method="get" role="search">
+      <label class="sr" for="hq">Search courses</label>
+      <input id="hq" class="field" type="search" name="q" placeholder="Name, tag or course ID" maxlength="100">
+    </form>
+    {{if .AuthOn}}<div class="who">
+      {{if .User}}{{if .WebsiteURL}}<a class="btn ghost" href="{{.WebsiteURL}}/account" title="Your OpenPak account">{{.User.Name}}</a>{{else}}<span class="btn ghost">{{.User.Name}}</span>{{end}}
+      {{else if .WebsiteURL}}<a class="btn" href="{{.WebsiteURL}}/login">Sign in</a>{{end}}
+    </div>{{end}}
+  </div>
+</header>
+<main id="main" class="wrap">
+{{template "content" .}}
+</main>
+<footer class="foot">
+  <div class="wrap">
+    <p>An unofficial fan site, not affiliated with or endorsed by Nintendo. Super Mario Maker and Super Mario Maker 2 are trademarks of Nintendo.
+    Super Mario Maker 2 maker codes shown here are OpenPak's own, not Nintendo's.</p>
+    <p>Part of <a href="https://openpak.org">OpenPak</a> · <a href="https://github.com/openpak/mario-maker">Source (AGPL-3.0-only)</a></p>
+  </div>
+</footer>
+</body>
+</html>{{end}}
+
+{{define "card"}}<li class="tile-wrap"><a class="tile sel" href="/course/{{.Game}}/{{.ID}}">
+  <span class="well">{{if .HasThumbnail}}<img src="{{thumb .}}" alt="" loading="lazy" width="320" height="180">{{else}}<span class="nothumb">No thumbnail</span>{{end}}</span>
+  <span class="tile-body">
+    <span class="tile-name">{{if .Name}}{{.Name}}{{else}}Untitled course{{end}}</span>
+    <span class="sub">{{if .MakerName}}{{.MakerName}}{{else}}unknown maker{{end}} · {{gameShort .Game}}</span>
+    <span class="stats"><span title="Stars">★ {{num .Stars}}</span><span title="Plays">▶ {{num .Plays}}</span><span title="Clears">⚑ {{num .Clears}}</span></span>
+  </span>
+</a></li>{{end}}

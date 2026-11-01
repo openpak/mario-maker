@@ -1,0 +1,27 @@
+{{define "content"}}
+<div class="page-head">
+  <h1>Courses</h1>
+  <p>Courses uploaded by OpenPak players, for Super Mario Maker on Wii U and Super Mario Maker 2 on Switch.</p>
+</div>
+{{with .Data}}
+<nav class="tabs" aria-label="Game">
+  <a href="/" {{if eq .Game ""}}aria-current="page"{{end}}>All games</a>
+  <a href="/?game=smm1" {{if eq .Game "smm1"}}aria-current="page"{{end}}>{{gameShort "smm1"}} <span class="count">{{num (index .Counts "smm1")}}</span></a>
+  <a href="/?game=smm2" {{if eq .Game "smm2"}}aria-current="page"{{end}}>{{gameShort "smm2"}} <span class="count">{{num (index .Counts "smm2")}}</span></a>
+</nav>
+{{if eq .Total 0}}
+<div class="notice">
+  <h2>No courses yet</h2>
+  <p>Nothing has been uploaded{{if .Game}} for {{gameName .Game}}{{end}} yet. Upload a course from the game while connected to OpenPak and it shows up here within a minute.</p>
+</div>
+{{else}}
+{{$game := .Game}}
+{{range .Shelves}}
+<section class="shelf">
+  <div class="section-head"><h2>{{.Title}}</h2><a href="/browse?sort={{.Sort}}{{if $game}}&amp;game={{$game}}{{end}}">See all</a></div>
+  {{if .Courses}}<ul class="grid">{{range .Courses}}{{template "card" .}}{{end}}</ul>{{else}}<p class="empty">Nothing here yet.</p>{{end}}
+</section>
+{{end}}
+{{end}}
+{{end}}
+{{end}}

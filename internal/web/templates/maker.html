@@ -1,0 +1,17 @@
+{{define "content"}}{{with .Data}}{{$m := .M}}
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/browse?game={{$m.Game}}">{{gameName $m.Game}}</a></nav>
+<div class="page-head">
+  <h1>{{if $m.Name}}{{$m.Name}}{{else}}Maker {{$m.ID}}{{end}}</h1>
+  <p class="idline"><span class="label">Maker ID</span> <code class="copy" title="Click to select, then copy">{{$m.ID}}</code></p>
+</div>
+<dl class="facts card info">
+  <div><dt>Courses</dt><dd>{{num $m.Courses}}</dd></div>
+  <div><dt>Stars received</dt><dd>{{num $m.Stars}}</dd></div>
+  <div><dt>Plays</dt><dd>{{num $m.Plays}}</dd></div>
+  <div><dt>Joined</dt><dd>{{date $m.Created}}</dd></div>
+</dl>
+<h2>Courses</h2>
+{{if .Courses}}<ul class="grid">{{range .Courses}}{{template "card" .}}{{end}}</ul>
+{{if gt .Total (len .Courses)}}<p class="hint">Showing {{len .Courses}} of {{num .Total}}.</p>{{end}}
+{{else}}<div class="notice"><p>This maker has no courses on the site yet.</p></div>{{end}}
+{{end}}{{end}}

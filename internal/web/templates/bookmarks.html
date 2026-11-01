@@ -1,0 +1,10 @@
+{{define "content"}}
+<div class="page-head"><h1>Your bookmarks</h1></div>
+{{with .Data}}
+{{if eq .State "signin"}}<div class="notice"><p>Sign in with your OpenPak account to see the courses you bookmarked.</p></div>
+{{else if eq .State "link"}}<div class="notice"><p>Link your Wii U Network ID to your OpenPak account to bookmark courses here and play them from the in-game Bookmarks list.</p></div>
+{{else if .Courses}}<p class="hint">These show up in Super Mario Maker on your Wii U.</p>
+<ul class="grid">{{range .Courses}}{{template "card" .}}{{end}}</ul>
+{{else}}<div class="notice"><p>No bookmarks yet. Open a Super Mario Maker (Wii U) course and press Bookmark.</p></div>{{end}}
+{{end}}
+{{end}}

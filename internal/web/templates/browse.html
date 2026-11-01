@@ -1,0 +1,31 @@
+{{define "content"}}
+<div class="page-head"><h1>Browse courses</h1></div>
+{{with .Data}}
+<form class="filters card" action="/browse" method="get">
+  <div><label for="q">Search</label><input id="q" class="field" type="search" name="q" value="{{.Q}}" placeholder="Name, tag or course ID" maxlength="100"></div>
+  <div><label for="game">Game</label><select id="game" class="field" name="game">
+    <option value="" {{if eq .Game ""}}selected{{end}}>Both games</option>
+    <option value="smm1" {{if eq .Game "smm1"}}selected{{end}}>{{gameName "smm1"}}</option>
+    <option value="smm2" {{if eq .Game "smm2"}}selected{{end}}>{{gameName "smm2"}}</option></select></div>
+  <div><label for="sort">Sort by</label><select id="sort" class="field" name="sort">
+    <option value="newest" {{if eq .Sort "newest"}}selected{{end}}>Newest</option>
+    <option value="stars" {{if eq .Sort "stars"}}selected{{end}}>Most stars</option>
+    <option value="plays" {{if eq .Sort "plays"}}selected{{end}}>Most plays</option></select></div>
+  <button type="submit" class="btn primary">Search</button>
+</form>
+<p class="hint" role="status">{{num .Total}} course{{if ne .Total 1}}s{{end}}{{if .Q}} matching “{{.Q}}”{{end}}</p>
+{{if .Courses}}
+<ul class="grid">{{range .Courses}}{{template "card" .}}{{end}}</ul>
+<nav class="pager" aria-label="Pages">
+  {{if .PrevURL}}<a class="btn" rel="prev" href="{{.PrevURL}}">Previous</a>{{else}}<span class="btn off" aria-disabled="true">Previous</span>{{end}}
+  <span>Page {{.Page}} of {{.Pages}}</span>
+  {{if .NextURL}}<a class="btn" rel="next" href="{{.NextURL}}">Next</a>{{else}}<span class="btn off" aria-disabled="true">Next</span>{{end}}
+</nav>
+{{else}}
+<div class="notice">
+  {{if .Q}}<p>No course matches “{{.Q}}”. Try fewer words, or paste a full course ID.</p>
+  {{else}}<p>No courses to show yet. Upload one from the game and it appears here within a minute.</p>{{end}}
+</div>
+{{end}}
+{{end}}
+{{end}}

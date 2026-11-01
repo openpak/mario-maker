@@ -1,0 +1,5 @@
+/mario-maker
+*.test
+*.out
+.env
+/cache/
