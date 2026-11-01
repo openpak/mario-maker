@@ -167,7 +167,9 @@ code.copy:hover { border-color: var(--cursor); }
 .actions { margin-top: 2rem; padding: 1rem 1.25rem; }
 .actions p { margin: 0 0 .75rem; }
 .actions .row { display: flex; flex-wrap: wrap; gap: .75rem; margin: 0; }
-.stack { display: grid; gap: 1rem; max-width: 40rem; }
+.stack { display: grid; gap: 1rem 1.25rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); align-items: start; }
+.stack > .wide, .stack > p, .stack > button { grid-column: 1 / -1; }
+.claim .stack { max-width: 40rem; }
 .stack label { display: block; margin-bottom: .25rem; }
 textarea.field { resize: vertical; min-height: 6rem; }
 select.field { appearance: auto; }
@@ -175,7 +177,8 @@ select.field { appearance: auto; }
 .notice.err { border-left-color: #c2410c; }
 .claim { margin-top: 2rem; }
 .claim h2 { margin-top: 0; }
-.prose { max-width: 48rem; }
+.prose { max-width: none; }
+.prose p { max-width: 70rem; }
 .prose h2:first-child { margin-top: 0; }
 .credit { margin-top: 1.5rem; max-width: 48rem; }
 .tbl-wrap { overflow-x: auto; }

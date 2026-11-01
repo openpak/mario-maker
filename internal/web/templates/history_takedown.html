@@ -21,10 +21,10 @@
   <div><label for="id">Course code or maker Network ID</label><input id="id" class="field" name="id" value="{{.ID}}" maxlength="40" required autocomplete="off" placeholder="635C-0000-0045-AF89 or a Network ID"></div>
   <div><label for="name">Your name</label><input id="name" class="field" name="name" value="{{.Name}}" maxlength="100" required autocomplete="name"></div>
   <div><label for="contact">How we can reach you (email or other)</label><input id="contact" class="field" name="contact" value="{{.Contact}}" maxlength="200" required autocomplete="email"></div>
-  <div><label for="reason">Reason (optional)</label><textarea id="reason" class="field" name="reason" rows="4" maxlength="2000">{{.Reason}}</textarea></div>
+  <div class="wide"><label for="reason">Reason (optional)</label><textarea id="reason" class="field" name="reason" rows="4" maxlength="2000">{{.Reason}}</textarea></div>
   <div class="hp" aria-hidden="true"><label for="website">Leave this empty</label><input id="website" class="field" name="website" tabindex="-1" autocomplete="off"></div>
   <p class="hint">You can also write to {{mailto .Email}}.</p>
-  <div><button class="btn primary" type="submit">Hide it and send the request</button></div>
+  <div class="wide"><button class="btn primary" type="submit">Hide it and send the request</button></div>
 </form>
 {{end}}
 {{end}}{{end}}

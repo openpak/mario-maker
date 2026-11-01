@@ -4,6 +4,10 @@
 
 - `tools/coursegen`: generator, validator and review folder for about 60 OpenPak starter courses for Super Mario Maker (Wii U). Not part of the site binary. The files are not verified in the game and the DataStore import is off by default; see `tools/coursegen/README.md`
 
+## v0.3.3 — 2026-11-01
+
+- History: the About page and the removal form use the full page width on wide screens
+
 ## v0.3.2 — 2026-11-01
 
 - The takedown address is plain text (no mail link): Cloudflare rewrites mail links to a form that needs JavaScript
