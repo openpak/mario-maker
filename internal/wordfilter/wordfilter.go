@@ -55,7 +55,7 @@ var ignore = map[string]bool{
 	"inferno": true, "mama": true, "sega": true, "brinca": true, "balle": true, "pesce": true, "regina": true, "mona": true,
 	"cozza": true, "potta": true, "pau": true, "saco": true, "burro": true, "cu": true, "cona": true, "xana": true, "comer": true,
 	"pinto": true, "martillo": true, "concha": true, "folle": true, "reich": true, "naked": true, "spick": true, "cracker": true,
-	"biga": true, "sm": true, "s&m": true, "s ＆ m": true, "infierno": true, "maldito": true,
+	"biga": true, "troia": true, "sm": true, "s&m": true, "s ＆ m": true, "infierno": true, "maldito": true,
 	"いたずら": true, "ファンタジー": true, "縛り": true, "殺人事件": true, "両刀": true, "おしり": true, "オシリ": true,
 	"お尻": true, "カント": true, "ローター": true, "嫌い": true, "女の子": true, "人種": true, "支配": true,
 	"フック": true, "ラバー": true, "グロ": true, "なめ": true, "殺し方": true, "毛深い": true, "誘惑": true,

@@ -4,6 +4,10 @@
 
 - `tools/coursegen`: generator, validator and review folder for about 60 OpenPak starter courses for Super Mario Maker (Wii U). Not part of the site binary. The files are not verified in the game and the DataStore import is off by default; see `tools/coursegen/README.md`
 
+## v0.3.6 — 2026-11-01
+
+- Word filter: two false positives fixed (a Japanese entry that matched inside "Pac-Man course", and the Portuguese "Troia" for Troy)
+
 ## v0.3.5 — 2026-11-01
 
 - Shared Open-site shell on every page: content centred in the 74rem wrap with OpenKart's header, current-page style (raised pill with a cyan underline), spacing and footer
