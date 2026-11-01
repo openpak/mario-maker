@@ -4,6 +4,14 @@
 
 - `tools/coursegen`: generator, validator and review folder for about 60 OpenPak starter courses for Super Mario Maker (Wii U). Not part of the site binary. The files are not verified in the game and the DataStore import is off by default; see `tools/coursegen/README.md`
 
+## v0.3.5 — 2026-11-01
+
+- Shared Open-site shell on every page: content centred in the 74rem wrap with OpenKart's header, current-page style (raised pill with a cyan underline), spacing and footer
+- One search box per page: the header search is hidden on Browse and History, which have their own filter form. Header search on History pages searches the archive
+- History cards match the live grid: a small original picture per game style, equal heights, a short style pill (SMB, SMB3, SMW, NSMBU, full name on hover), "Originally by" everywhere, and one stats line (stars, plays, clear rate, shortened as 2.5M)
+- Course and maker names carry `translate="no"` and `dir="auto"` so browser translation leaves them alone; the filter label reads "Style"
+- Claims by matching Network ID work once `MARIO_MAKER_LINK_URL` points at nn-account's `/internal/wiiu-nnid`
+
 ## v0.3.4 — 2026-11-01
 
 - History word filter widened: Portuguese and Italian lists (LDNOOBW, CC BY 4.0) and an own list of hate figures, groups, slogans, slurs and sexual terms in seven languages, with look-alike digits and symbols folded and severe terms matched through spacing and repeated letters. Checked against the archive so clean titles ("LOL!", "Bowser's Inferno") stay visible. The About page lists all seven languages

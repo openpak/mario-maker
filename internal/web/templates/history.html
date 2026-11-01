@@ -8,8 +8,8 @@
   <p><strong>Archived, not playable yet.</strong> Only the details of these courses survive, not the courses themselves, so they cannot be downloaded or played here. They are shown as history and belong to their makers. <a href="/history/about">About this archive</a>.</p>
 </div>
 <form class="filters card" action="/history" method="get">
-  <div><label for="q">Search</label><input id="q" class="field" type="search" name="q" value="{{.Q}}" placeholder="Name, maker or code" maxlength="100"></div>
-  <div><label for="theme">Game style</label><select id="theme" class="field" name="theme">
+  <div><label for="q">Search</label><input id="q" class="field" type="search" name="q" value="{{.Q}}" placeholder="Course, maker or code" maxlength="100"></div>
+  <div><label for="theme">Style</label><select id="theme" class="field" name="theme">
     <option value="">All styles</option>
     {{$t := .Theme}}{{range .Themes}}<option value="{{.}}" {{if eq . $t}}selected{{end}}>{{theme .}}</option>{{end}}</select></div>
   <div><label for="year">Year</label><select id="year" class="field" name="year">

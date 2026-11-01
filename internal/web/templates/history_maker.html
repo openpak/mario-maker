@@ -2,9 +2,9 @@
 <nav class="crumbs" aria-label="Breadcrumb"><a href="/history">History</a></nav>
 <div class="page-head">
   <p class="badges"><span class="badge soft">Archived maker</span> <span class="badge warn">Courses not playable yet</span></p>
-  <h1>{{if $m.Name}}{{$m.Name}}{{else}}{{$m.ID}}{{end}}</h1>
+  <h1 translate="no" dir="auto">{{if $m.Name}}{{$m.Name}}{{else}}{{$m.ID}}{{end}}</h1>
   <p class="idline"><span class="label">Network ID</span> <code class="copy" title="Click to select, then copy">{{$m.ID}}</code></p>
-  {{with $m.Claim}}<p class="by claimed">Claimed by {{.AccountName}}</p>{{end}}
+  {{with $m.Claim}}<p class="by claimed">Claimed by <span translate="no" dir="auto">{{.AccountName}}</span></p>{{end}}
 </div>
 <dl class="facts card info">
   <div><dt>Archived courses</dt><dd>{{num $m.Courses}}</dd></div>

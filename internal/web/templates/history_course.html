@@ -1,15 +1,15 @@
 {{define "content"}}{{with .Data}}{{$c := .C}}
 <nav class="crumbs" aria-label="Breadcrumb"><a href="/history">History</a></nav>
 <article class="card info hist">
-  <p class="badges"><span class="badge soft"><span>Archived · originally by {{if .HasMaker}}<a href="/history/maker/{{$c.MakerID}}">{{if $c.MakerName}}{{$c.MakerName}}{{else}}{{$c.MakerID}}{{end}}</a>{{else if $c.MakerName}}{{$c.MakerName}}{{else}}an unknown maker{{end}}</span></span>
+  <p class="badges"><span class="badge soft"><span>Archived · Originally by {{if .HasMaker}}<a href="/history/maker/{{$c.MakerID}}" translate="no" dir="auto">{{if $c.MakerName}}{{$c.MakerName}}{{else}}{{$c.MakerID}}{{end}}</a>{{else if $c.MakerName}}<span translate="no" dir="auto">{{$c.MakerName}}</span>{{else}}an unknown maker{{end}}</span></span>
   <span class="badge warn">Not playable yet</span></p>
-  <h1>{{if $c.Name}}{{$c.Name}}{{else}}Untitled course{{end}}</h1>
+  <h1 translate="no" dir="auto">{{if $c.Name}}{{$c.Name}}{{else}}Untitled course{{end}}</h1>
   <p class="idline"><span class="label">Course code</span> <code class="copy" title="Click to select, then copy">{{$c.ID}}</code></p>
-  {{if $c.MakerClaim}}<p class="by">Maker profile claimed by {{$c.MakerClaim}}.</p>{{end}}
+  {{if $c.MakerClaim}}<p class="by">Maker profile claimed by <span translate="no" dir="auto">{{$c.MakerClaim}}</span>.</p>{{end}}
   <dl class="facts">
-    <div><dt>Game style</dt><dd>{{theme $c.Theme}}</dd></div>
+    <div><dt>Style</dt><dd>{{theme $c.Theme}}</dd></div>
     {{if $c.Difficulty}}<div><dt>Difficulty</dt><dd>{{$c.Difficulty}}</dd></div>{{end}}
-    {{if $c.Tag}}<div><dt>Tag</dt><dd>{{$c.Tag}}</dd></div>{{end}}
+    {{if $c.Tag}}<div><dt>Tag</dt><dd translate="no">{{$c.Tag}}</dd></div>{{end}}
     <div><dt>Stars</dt><dd>{{num $c.Stars}}</dd></div>
     <div><dt>Plays</dt><dd>{{num $c.Plays}}</dd></div>
     <div><dt>Clears</dt><dd>{{num $c.Clears}}</dd></div>

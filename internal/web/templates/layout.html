@@ -33,10 +33,10 @@
       <a href="/browse" {{if eq .Path "/browse"}}aria-current="page"{{end}}>Browse</a>
       <a href="/history" {{if hasPrefix .Path "/history"}}aria-current="page"{{end}}>History</a>
     </nav>
-    {{$h := hasPrefix .Path "/history"}}<form class="search" action="{{if $h}}/history{{else}}/browse{{end}}" method="get" role="search">
+    {{$h := hasPrefix .Path "/history"}}{{if not (noSearch .Path)}}<form class="search" action="{{if $h}}/history{{else}}/browse{{end}}" method="get" role="search">
       <label class="sr" for="hq">Search {{if $h}}the archive{{else}}courses{{end}}</label>
       <input id="hq" class="field" type="search" name="q" placeholder="{{if $h}}Course, maker or course code{{else}}Name, tag or course ID{{end}}" maxlength="100">
-    </form>
+    </form>{{end}}
     {{if .AuthOn}}<div class="who">
       {{if .User}}<a class="btn ghost" href="/auth/logout">Sign out</a>
       <a class="avatar-btn" href="{{or .WebsiteURL "https://openpak.org"}}/account" aria-label="Your account" title="{{.User.Name}}">{{.User.Initial}}</a>
@@ -85,18 +85,19 @@
 {{define "card"}}<li class="tile-wrap"><a class="tile sel" href="/course/{{.Game}}/{{.ID}}">
   <span class="well">{{if .HasThumbnail}}<img src="{{thumb .}}" alt="" loading="lazy" width="320" height="180">{{else}}<span class="nothumb">No thumbnail</span>{{end}}</span>
   <span class="tile-body">
-    <span class="tile-name">{{if .Name}}{{.Name}}{{else}}Untitled course{{end}}</span>
-    <span class="sub">{{if .MakerName}}{{.MakerName}}{{else}}unknown maker{{end}} · {{gameShort .Game}}</span>
+    <span class="tile-name" translate="no" dir="auto">{{if .Name}}{{.Name}}{{else}}Untitled course{{end}}</span>
+    <span class="sub"><span translate="no" dir="auto">{{if .MakerName}}{{.MakerName}}{{else}}unknown maker{{end}}</span> · {{gameShort .Game}}</span>
     <span class="stats"><span title="Stars">★ {{num .Stars}}</span><span title="Plays">▶ {{num .Plays}}</span><span title="Clears">⚑ {{num .Clears}}</span></span>
   </span>
 </a></li>{{end}}
 
 {{define "acard"}}<li class="tile-wrap"><a class="tile sel arch" href="/history/course/{{.ID}}">
+  <span class="well"><img src="{{art .Theme}}" alt="" loading="lazy" width="320" height="100"></span>
   <span class="tile-body">
-    <span class="badge soft">Archived · {{theme .Theme}}</span>
-    <span class="tile-name">{{if .Name}}{{.Name}}{{else}}Untitled course{{end}}</span>
-    <span class="sub">originally by {{if .MakerName}}{{.MakerName}}{{else if .MakerID}}{{.MakerID}}{{else}}an unknown maker{{end}}</span>
-    <span class="stats"><span title="Stars">★ {{num .Stars}}</span><span title="Plays">▶ {{num .Plays}}</span><span title="Clear rate">✓ {{arate .}}</span></span>
+    <span class="pill" title="{{theme .Theme}}">{{abbr .Theme}}</span>
+    <span class="tile-name" translate="no" dir="auto">{{if .Name}}{{.Name}}{{else}}Untitled course{{end}}</span>
+    <span class="sub">Originally by <span translate="no" dir="auto">{{if .MakerName}}{{.MakerName}}{{else if .MakerID}}{{.MakerID}}{{else}}an unknown maker{{end}}</span></span>
+    <span class="stats"><span title="{{num .Stars}} stars">★ {{compact .Stars}}</span><span title="{{num .Plays}} plays">▶ {{compact .Plays}}</span><span title="Clear rate">✓ {{arate .}}</span></span>
   </span>
 </a></li>{{end}}
 

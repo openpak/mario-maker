@@ -107,7 +107,7 @@ func TestHistoryPages(t *testing.T) {
 
 	// course detail
 	code, body, hd := get(h, "/history/course/AAAA-0000-0000-0001")
-	for _, want := range []string{"Archived · originally by", `href="/history/maker/mia_99"`, "Mia &lt;b&gt;", "Not playable yet", `<code class="copy"`, "AAAA-0000-0000-0001",
+	for _, want := range []string{"Archived · Originally by", `href="/history/maker/mia_99"`, "Mia &lt;b&gt;", "Not playable yet", `<code class="copy"`, "AAAA-0000-0000-0001",
 		"1,200", "5,000", "40.5%", "17 Sep 2015", "Super Mario Bros.", "Remove this", "/history/takedown?kind=course&amp;id=AAAA-0000-0000-0001", "This is mine", `content="noindex, follow"`} {
 		if code != 200 || !strings.Contains(body, want) {
 			t.Errorf("course page missing %q (%d)", want, code)
@@ -354,5 +354,31 @@ func TestClaimFlow(t *testing.T) {
 	// a moderator approving the older pending claim must not make a second owner
 	if err := st.DecideClaim(context.Background(), cl[0].ID, "approved"); err == nil {
 		t.Error("second approval accepted")
+	}
+}
+
+func TestOneSearchBoxAndTranslationMarks(t *testing.T) {
+	st := seedHistory(t)
+	h := historyServer(t, st, nil, nil, "")
+	for _, p := range []string{"/", "/browse", "/history", "/history?q=castle", "/history/about", "/history/course/AAAA-0000-0000-0001", "/history/maker/mia_99"} {
+		_, body, _ := get(h, p)
+		if n := strings.Count(body, `type="search"`); n > 1 {
+			t.Errorf("%s: %d search boxes", p, n)
+		}
+	}
+	_, body, _ := get(h, "/history")
+	for _, want := range []string{`translate="no" dir="auto">Sky Castle`, `title="Super Mario Bros.">SMB</span>`, "Originally by", `<label for="theme">Style</label>`, "/static/art/mario_bros.svg"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("history cards missing %q", want)
+		}
+	}
+	if strings.Contains(body, "Archived ·") {
+		t.Error("cards must not repeat the Archived prefix")
+	}
+	if strings.Contains(body, "originally by") {
+		t.Error("inconsistent casing")
+	}
+	if code, _, _ := get(h, "/static/art/mario_world.svg"); code != 200 {
+		t.Errorf("art: %d", code)
 	}
 }

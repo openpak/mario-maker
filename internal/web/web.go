@@ -109,6 +109,10 @@ func New(cfg Config) (*Server, error) {
 		"noat": func(v string) template.HTML {
 			return template.HTML(strings.ReplaceAll(html.EscapeString(v), "@", "&#64;"))
 		}, // keeps contact addresses readable past Cloudflare's obfuscation
+		"abbr":      themeAbbr,
+		"art":       themeArt,
+		"compact":   compact,
+		"noSearch":  func(path string) bool { return path == "/browse" || path == "/history" },
 		"hasPrefix": strings.HasPrefix,
 		"stamp":     func(t time.Time) string { return t.UTC().Format("2 Jan 2006 15:04 UTC") },
 	}
@@ -520,4 +524,39 @@ func truncate(s string, n int) string {
 		return string(r)
 	}
 	return string(r[:n-1]) + "…"
+}
+
+// themeAbbr is the short style label on cards; the full name goes in the tooltip.
+func themeAbbr(t string) string {
+	switch t {
+	case "mario_bros":
+		return "SMB"
+	case "mario_bros3":
+		return "SMB3"
+	case "mario_world":
+		return "SMW"
+	case "mario_bros_u":
+		return "NSMBU"
+	}
+	return t
+}
+
+// themeArt is the placeholder picture of a style: our own drawings, one per game style.
+func themeArt(t string) string {
+	switch t {
+	case "mario_bros", "mario_bros3", "mario_world", "mario_bros_u":
+		return "/static/art/" + t + ".svg"
+	}
+	return "/static/art/mario_bros.svg"
+}
+
+// compact writes 1,594,405 as 1.6M and 12,345 as 12.3K so three numbers fit on one card line.
+func compact(n int) string {
+	switch {
+	case n >= 1_000_000:
+		return strconv.FormatFloat(float64(n)/1e6, 'f', 1, 64) + "M"
+	case n >= 10_000:
+		return strconv.FormatFloat(float64(n)/1e3, 'f', 1, 64) + "K"
+	}
+	return num(n)
 }

@@ -1,7 +1,7 @@
 {{define "content"}}{{with .Data}}{{$m := .M}}
 <nav class="crumbs" aria-label="Breadcrumb"><a href="/browse?game={{$m.Game}}">{{gameName $m.Game}}</a></nav>
 <div class="page-head">
-  <h1>{{if $m.Name}}{{$m.Name}}{{else}}Maker {{$m.ID}}{{end}}</h1>
+  <h1 translate="no" dir="auto">{{if $m.Name}}{{$m.Name}}{{else}}Maker {{$m.ID}}{{end}}</h1>
   <p class="idline"><span class="label">Maker ID</span> <code class="copy" title="Click to select, then copy">{{$m.ID}}</code></p>
 </div>
 <dl class="facts card info">

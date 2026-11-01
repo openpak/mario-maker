@@ -3,7 +3,7 @@
 <article class="course">
   <div class="well big">{{if $c.HasThumbnail}}<img src="{{thumb $c}}" alt="Thumbnail of {{if $c.Name}}{{$c.Name}}{{else}}this course{{end}}" width="640" height="360">{{else}}<span class="nothumb">No thumbnail</span>{{end}}</div>
   <div class="card info">
-    <h1>{{if $c.Name}}{{$c.Name}}{{else}}Untitled course{{end}}</h1>
+    <h1 translate="no" dir="auto">{{if $c.Name}}{{$c.Name}}{{else}}Untitled course{{end}}</h1>
     <p class="by">by {{if .HasMaker}}<a href="/maker/{{$c.Game}}/{{$c.MakerID}}">{{if $c.MakerName}}{{$c.MakerName}}{{else}}{{$c.MakerID}}{{end}}</a>{{else if $c.MakerName}}{{$c.MakerName}}{{else}}unknown maker{{end}}</p>
     <p class="idline"><span class="label">Course ID</span> <code class="copy" title="Click to select, then copy">{{$c.ID}}</code></p>
     {{if $c.Description}}<p class="descr">{{$c.Description}}</p>{{end}}
