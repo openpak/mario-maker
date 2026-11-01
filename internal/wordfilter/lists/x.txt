@@ -1,0 +1,333 @@
+# OpenPak's own additions (AGPL-3.0-only, like the rest of this repository). One entry per line.
+# Hate figures, groups and slogans; slurs and variants; sexual terms the published lists miss.
+# Latin entries match whole words after folding case, accents and look-alike characters.
+# Languages: en, ja, es, fr, de, pt, it. Check new entries against real data before adding (see docs/history.md).
+hitler
+adolf hitler
+hitlers
+nazi
+nazis
+nazism
+neonazi
+neo nazi
+neo nazis
+third reich
+reich
+heil hitler
+sieg heil
+mein kampf
+goebbels
+himmler
+eichmann
+mengele
+auschwitz
+holocaust
+final solution
+gas chamber
+gas chambers
+gas the jews
+kill the jews
+kill all jews
+death to jews
+jew hater
+white power
+white pride
+white supremacy
+white supremacist
+white genocide
+aryan
+aryan nation
+ku klux klan
+klansman
+klansmen
+kkk
+neo confederate
+isis
+al qaeda
+bin laden
+jihad
+terrorist
+nigger
+niggers
+nigga
+niggas
+nigg3r
+negro
+negros
+nignog
+coon
+coons
+darkie
+darky
+jigaboo
+porch monkey
+spic
+spics
+spick
+wetback
+wetbacks
+beaner
+beaners
+chink
+chinks
+gook
+gooks
+zipperhead
+slant eye
+kike
+kikes
+kyke
+yid
+yids
+hymie
+raghead
+ragheads
+towelhead
+towelheads
+sand nigger
+paki
+pakis
+honky
+cracker
+faggot
+faggots
+fag
+fags
+faggy
+dyke
+dykes
+tranny
+trannies
+shemale
+retard
+retards
+retarded
+spastic
+spaz
+mongoloid
+cripple
+lolicon
+loli
+shotacon
+pedo
+pedos
+pedophile
+pedophiles
+paedophile
+paedo
+child porn
+kiddie porn
+rape
+raped
+rapist
+rapists
+raping
+molest
+molester
+incest
+bestiality
+zoophilia
+necrophilia
+porn
+porno
+pornhub
+xvideos
+xhamster
+hentai
+rule 34
+onlyfans
+nsfw
+bdsm
+fetish
+nude
+nudes
+nudity
+naked
+blowjob
+blowjobs
+handjob
+rimjob
+dildo
+dildos
+orgasm
+orgasms
+masturbate
+masturbation
+masturbating
+jerk off
+cumshot
+creampie
+gangbang
+bukkake
+anal
+anus
+vagina
+penis
+boobs
+boobies
+titties
+pussy
+cock
+cocks
+slut
+sluts
+whore
+whores
+hooker
+prostitute
+sexo
+sexual
+sexy
+follar
+follada
+polla
+pollas
+verga
+pene
+tetas
+puta
+putas
+putero
+maricon
+maricones
+marica
+sudaca
+negrata
+violacion
+violador
+violadores
+pedofilo
+pedofila
+pornografia
+desnuda
+desnudo
+sexe
+sexuel
+baise
+chatte
+couille
+couilles
+nichons
+branler
+branlette
+sodomie
+fellation
+salope
+salopes
+encule
+enculer
+negre
+bicot
+bougnoule
+youpin
+youpine
+viol
+violeur
+pedophile
+pornographie
+sex
+geschlechtsverkehr
+ficken
+fick
+fotze
+fotzen
+schwanz
+titten
+muschi
+vergewaltigung
+vergewaltiger
+vergewaltigen
+hure
+huren
+nutte
+nutten
+kinderporno
+neger
+kanake
+kanaken
+untermensch
+untermenschen
+judensau
+judenfrei
+hakenkreuz
+fuhrer
+drittes reich
+schwuchtel
+schwuchteln
+zigeuner
+vergasen
+sexo
+foda
+foder
+fodeu
+caralho
+buceta
+piroca
+punheta
+estupro
+estuprador
+estupradores
+pedofilia
+cuzao
+viado
+viados
+bicha
+sapatao
+boiola
+traveco
+crioulo
+crioula
+nazista
+nazistas
+sesso
+cazzo
+cazzi
+figa
+puttana
+puttane
+troia
+pompino
+pompini
+stupro
+stupratore
+stupratori
+frocio
+froci
+ricchione
+terrone
+mongoloide
+nazista
+ヒトラー
+ナチス
+ナチズム
+ネオナチ
+鉤十字
+ハーケンクロイツ
+ホロコースト
+ガス室
+ユダヤ人を殺
+支那人
+ガイジ
+池沼
+きちがい
+キチガイ
+めくら
+つんぼ
+ちんぽ
+チンポ
+ちんこ
+まんこ
+マンコ
+セックス
+オナニー
+オナホ
+フェラ
+ロリコン
+ショタコン
+痴漢
+強姦
+輪姦
+児童ポルノ
+エロ画像
+ペド
+童貞

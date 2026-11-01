@@ -19,7 +19,7 @@ import (
 var listFS embed.FS
 
 // Langs are the bundled languages in display order.
-var Langs = []string{"en", "ja", "es", "fr", "de"}
+var Langs = []string{"en", "ja", "es", "fr", "de", "pt", "it"}
 
 // ExtraLang labels hits from OpenPak's own additions.
 const ExtraLang = "x"
@@ -37,6 +37,10 @@ func LangName(l string) string {
 		return "French"
 	case "de":
 		return "German"
+	case "pt":
+		return "Portuguese"
+	case "it":
+		return "Italian"
 	}
 	return l
 }
@@ -48,15 +52,34 @@ func LangName(l string) string {
 var ignore = map[string]bool{
 	"hardcore": true, "hard core": true, "escort": true, "butt": true, "suck": true, "sucks": true,
 	"bite": true, "bitte": true, "trio": true, "péter": true, "pis": true, "con": true, "cul": true, "tit": true, "xx": true,
-	"sm": true, "s&m": true, "s ＆ m": true, "infierno": true, "maldito": true,
+	"inferno": true, "mama": true, "sega": true, "brinca": true, "balle": true, "pesce": true, "regina": true, "mona": true,
+	"cozza": true, "potta": true, "pau": true, "saco": true, "burro": true, "cu": true, "cona": true, "xana": true, "comer": true,
+	"pinto": true, "martillo": true, "concha": true, "folle": true, "reich": true, "naked": true, "spick": true, "cracker": true,
+	"biga": true, "sm": true, "s&m": true, "s ＆ m": true, "infierno": true, "maldito": true,
 	"いたずら": true, "ファンタジー": true, "縛り": true, "殺人事件": true, "両刀": true, "おしり": true, "オシリ": true,
 	"お尻": true, "カント": true, "ローター": true, "嫌い": true, "女の子": true, "人種": true, "支配": true,
 	"フック": true, "ラバー": true, "グロ": true, "なめ": true, "殺し方": true, "毛深い": true, "誘惑": true,
 	"裸": true, "拷問": true, "挿入": true, "革抑制": true, "卍": true,
 }
 
-// extra is OpenPak's own short list of hate terms the published lists lack (lang "x").
-var extra = []string{"hitler", "nazi", "nazis", "heil hitler", "sieg heil", "white power", "kkk"}
+// strong terms are distinctive enough to match inside the letters-only form of a title, which catches
+// "n.i.g.g.e.r", "h1tl3r" and "niggerrr". Nothing ordinary contains them.
+var strong = []string{"nigger", "faggot", "hitler", "heilhitler", "siegheil", "whitepower", "kukluxklan", "meinkampf", "gasthejews", "adolfhitler"}
+
+// flatten keeps only letters after look-alike folding, and squeezes runs of three or more of one letter to two.
+func flatten(s string) string {
+	var b []rune
+	for _, r := range strings.Join(deleet(tokens(fold(s, true))), "") {
+		if !unicode.IsLetter(r) {
+			continue
+		}
+		if n := len(b); n >= 2 && b[n-1] == r && b[n-2] == r {
+			continue
+		}
+		b = append(b, r)
+	}
+	return string(b)
+}
 
 // Hit says which entry of which list matched.
 type Hit struct{ Lang, Term string }
@@ -72,9 +95,10 @@ type entry struct {
 
 // Filter holds the compiled lists.
 type Filter struct {
-	words map[string][]entry // first word -> latin entries
-	subs  []entry
-	count map[string]int
+	words  map[string][]entry // first word -> latin entries
+	subs   []entry
+	strong []entry // severe terms matched inside the letters-only form of the text
+	count  map[string]int
 }
 
 var def *Filter
@@ -98,8 +122,15 @@ func mustLoad() *Filter {
 			f.add(l, strings.TrimSpace(line))
 		}
 	}
-	for _, t := range extra {
-		f.add(ExtraLang, t)
+	b, err := listFS.ReadFile("lists/x.txt")
+	if err != nil {
+		panic(err)
+	}
+	for _, line := range strings.Split(string(b), "\n") {
+		f.add(ExtraLang, strings.TrimSpace(line))
+	}
+	for _, t := range strong {
+		f.strong = append(f.strong, entry{lang: ExtraLang, term: t, sub: flatten(t)})
 	}
 	return f
 }
@@ -120,7 +151,7 @@ func isCJK(r rune) bool {
 }
 
 func (f *Filter) add(lang, term string) {
-	if term == "" || ignore[strings.ToLower(term)] {
+	if term == "" || strings.HasPrefix(term, "#") || ignore[strings.ToLower(term)] {
 		return
 	}
 	f.count[lang]++
@@ -160,7 +191,12 @@ func squash(s string) string {
 	}, s)
 }
 
-var leet = map[rune]rune{'0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '@': 'a', '$': 's', '!': 'i'}
+// leetSymbols are mapped before words are split ("a$$"); leetDigits only inside a token that also has a
+// letter, so "h1tl3r" folds but a number such as 1515 stays a number.
+var (
+	leetSymbols = map[rune]rune{'@': 'a', '$': 's'}
+	leetDigits  = map[rune]rune{'0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't'}
+)
 
 // fold lower-cases, drops accents and, when lookalike is set, maps look-alike digits and symbols.
 func fold(s string, lookalike bool) string {
@@ -171,7 +207,7 @@ func fold(s string, lookalike bool) string {
 			continue
 		}
 		if lookalike {
-			if m, ok := leet[r]; ok {
+			if m, ok := leetSymbols[r]; ok {
 				r = m
 			}
 		}
@@ -184,10 +220,35 @@ func tokens(s string) []string {
 	return strings.FieldsFunc(s, func(r rune) bool { return !unicode.IsLetter(r) && !unicode.IsDigit(r) })
 }
 
+// deleet maps look-alike digits to letters in every token that has a letter.
+func deleet(ws []string) []string {
+	out := make([]string, len(ws))
+	for i, w := range ws {
+		has := strings.IndexFunc(w, unicode.IsLetter) >= 0
+		out[i] = w
+		if has {
+			out[i] = strings.Map(func(r rune) rune {
+				if m, ok := leetDigits[r]; ok {
+					return m
+				}
+				return r
+			}, w)
+		}
+	}
+	return out
+}
+
 // Check returns the first list entry that matches s, or the zero Hit.
 func (f *Filter) Check(s string) Hit {
 	if strings.TrimSpace(s) == "" {
 		return Hit{}
+	}
+	if flat := flatten(s); flat != "" {
+		for _, e := range f.strong {
+			if strings.Contains(flat, e.sub) {
+				return Hit{e.lang, e.term}
+			}
+		}
 	}
 	sq := squash(s)
 	for _, e := range f.subs {
@@ -197,6 +258,9 @@ func (f *Filter) Check(s string) Hit {
 	}
 	for _, look := range []bool{false, true} {
 		ws := tokens(fold(s, look))
+		if look {
+			ws = deleet(ws)
+		}
 		for i, w := range ws {
 			for _, e := range f.words[w] {
 				if i+len(e.words) > len(ws) {

@@ -4,6 +4,10 @@
 
 - `tools/coursegen`: generator, validator and review folder for about 60 OpenPak starter courses for Super Mario Maker (Wii U). Not part of the site binary. The files are not verified in the game and the DataStore import is off by default; see `tools/coursegen/README.md`
 
+## v0.3.4 — 2026-11-01
+
+- History word filter widened: Portuguese and Italian lists (LDNOOBW, CC BY 4.0) and an own list of hate figures, groups, slogans, slurs and sexual terms in seven languages, with look-alike digits and symbols folded and severe terms matched through spacing and repeated letters. Checked against the archive so clean titles ("LOL!", "Bowser's Inferno") stay visible. The About page lists all seven languages
+
 ## v0.3.3 — 2026-11-01
 
 - History: the About page and the removal form use the full page width on wide screens

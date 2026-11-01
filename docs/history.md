@@ -34,12 +34,11 @@ directory under `$TMPDIR` and removed.
 
 ## Word filter
 
-`internal/wordfilter`, lists in `internal/wordfilter/lists/` (English, Japanese, Spanish, French, German).
+`internal/wordfilter`, lists in `internal/wordfilter/lists/` (English, Japanese, Spanish, French, German, Portuguese, Italian).
 Source: LDNOOBW "List of Dirty, Naughty, Obscene, and Otherwise Bad Words",
 https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words at commit
 `5faf2ba42d7b1c0977169ec3611df25a3c08eb13`, licence **CC BY 4.0** (the repository's licence file; an earlier
-note said CC BY-SA). Attribution is on the About page and in `lists/NOTICE.md`. Plus a seven-term list of our
-own for hate terms (`extra`).
+note said CC BY-SA). Attribution is on the About page and in `lists/NOTICE.md`. Plus `lists/x.txt`, our own list of hate figures, groups and slogans, slurs and sexual terms in all seven languages; severe terms also match through spacing and repeated letters. Look-alike digits fold only inside a word that has a letter, and `!` is never folded ("LOL!" and "1515" stay clean).
 
 Latin-script entries match whole words (or word sequences) after folding case, accents and look-alike
 characters (`$`→s, `0`→o, ...). Japanese and symbol entries match as substrings with spaces removed. Titles
