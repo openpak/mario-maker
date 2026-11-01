@@ -8,7 +8,7 @@ Nothing else builds the image.
 
 1. A Postgres database `mario_maker` and a role that owns it. The service creates its own tables.
 2. The read APIs of the two titles reachable from the container (api-contract.md), and their keys.
-3. A router for the public host (for example `openmaker.openpak.org`) to the container port.
+3. A router for the public host (for example `maker.openpak.org`) to the container port.
 
 ## Run
 
@@ -46,7 +46,7 @@ works in its own throwaway schema.
 
 Runs on the primary as the user service `openpak-mario-maker.service` (binary extracted from the
 image into `~/openpak/deploy/mario-maker`, env in `mario-maker.env`), listening on
-`127.0.0.1:20161`; the Cloudflare hostname `openmaker.openpak.org -> http://localhost:20161` is added by
+`127.0.0.1:20161`; the Cloudflare hostname `maker.openpak.org -> http://localhost:20161` is added by
 the owner. It is a host service rather than a quadlet because the container keyring quota
 (`kernel.keys.maxkeys=200`) is exhausted fleet-wide; the prepared quadlet is
 `openpak-mario-maker.container.pending` next to the binary. The site reaches Postgres (database

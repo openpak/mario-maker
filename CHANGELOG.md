@@ -1,5 +1,10 @@
 # Changelog: mario-maker
 
+## v0.1.2
+
+- Address is maker.openpak.org.
+- Footer links back with "Part of the OpenPak network".
+
 ## v0.1.1
 
 - Named OpenMaker (openmaker.openpak.org), with the OpenMaker mark and the shared Open site header and footer.

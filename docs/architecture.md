@@ -42,7 +42,7 @@ header shows the display name linking to `MARIO_MAKER_WEBSITE_URL/account`. Sign
 request is made. Pages for signed-in visitors are sent `Cache-Control: private, no-store`.
 
 The website sets its cookie without a `Domain`, so a browser only sends it to the website's own
-host. On a separate host (`openmaker.openpak.org`) visitors therefore look signed out until the
+host. On a separate host (`maker.openpak.org`) visitors therefore look signed out until the
 website sets the cookie for the parent domain, or the site is routed under the website's host. Until
 then the feature is harmless: it just shows "Sign in".
 
