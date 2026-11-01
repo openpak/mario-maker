@@ -152,3 +152,35 @@ code.copy:hover { border-color: var(--cursor); }
 .site-foot .brand { color: var(--ink); font-size: 1.15rem; }
 .site-foot .muted { color: var(--muted); }
 .foot-bottom { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 22px; border-top: 1px solid var(--line); font-size: .86rem; color: var(--muted); }
+
+/* History (archived courses) */
+.tile.arch .tile-body { padding-top: .9rem; }
+.tile.arch .badge { justify-self: start; margin-bottom: .2rem; }
+.stats span { white-space: nowrap; }
+.stats { flex-wrap: wrap; gap: .25rem 1rem; }
+.badge.soft { background: var(--accent-weak); border-color: var(--accent-line); color: var(--ink); }
+.badge.warn { background: var(--warn-weak); border-color: var(--warn-line); color: var(--ink); }
+.badges { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 .75rem; }
+.badges a { color: var(--accent); }
+.hist .facts { margin: 1rem 0; }
+.claimed { color: var(--ink); font-family: var(--font-ui); font-weight: 700; }
+.actions { margin-top: 2rem; padding: 1rem 1.25rem; }
+.actions p { margin: 0 0 .75rem; }
+.actions .row { display: flex; flex-wrap: wrap; gap: .75rem; margin: 0; }
+.stack { display: grid; gap: 1rem; max-width: 40rem; }
+.stack label { display: block; margin-bottom: .25rem; }
+textarea.field { resize: vertical; min-height: 6rem; }
+select.field { appearance: auto; }
+.hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.notice.err { border-left-color: #c2410c; }
+.claim { margin-top: 2rem; }
+.claim h2 { margin-top: 0; }
+.prose { max-width: 48rem; }
+.prose h2:first-child { margin-top: 0; }
+.credit { margin-top: 1.5rem; max-width: 48rem; }
+.tbl-wrap { overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.tbl th, .tbl td { text-align: left; vertical-align: top; padding: .5rem .6rem; border-bottom: 1px solid var(--line); }
+.tbl .reason { max-width: 20rem; overflow-wrap: anywhere; white-space: pre-line; }
+form.inline { display: flex; flex-wrap: wrap; gap: .4rem; }
+form.inline .btn { min-height: 36px; padding: 0 .8rem; font-size: .85rem; }

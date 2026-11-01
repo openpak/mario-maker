@@ -1,0 +1,30 @@
+{{define "content"}}{{with .Data}}
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/history">History</a></nav>
+{{if .Sent}}
+<div class="page-head"><h1>Request received</h1></div>
+<div class="notice">
+  {{if .Found}}<p><strong>The entry is hidden now.</strong> It no longer appears on the History pages or in search.</p>
+  {{else}}<p><strong>We did not find that {{.Kind}} in the archive.</strong> Check the {{if eq .Kind "course"}}course code{{else}}Network ID{{end}} and send the form again. Your request is saved and will apply if the entry is there.</p>{{end}}
+  <p>A moderator reviews every request, and takedowns are honoured within 48 hours. Your request number is {{.RequestID}}. We will use the contact you gave only to answer this request.</p>
+</div>
+<p><a class="btn" href="/history">Back to History</a></p>
+{{else}}
+<div class="page-head">
+  <h1>Remove an entry</h1>
+  <p>Ask for a course or a maker to be removed from the History archive. The entry is hidden the moment you send this form, and takedowns are honoured within 48 hours. You do not need to prove anything to have it hidden.</p>
+</div>
+{{if .Error}}<div class="notice err" role="alert"><p>{{.Error}}</p></div>{{end}}
+<form class="card info stack" method="post" action="/history/takedown">
+  <div><label for="kind">What should be removed?</label><select id="kind" class="field" name="kind">
+    <option value="course" {{if eq .Kind "course"}}selected{{end}}>A course</option>
+    <option value="maker" {{if eq .Kind "maker"}}selected{{end}}>A maker, with all their courses</option></select></div>
+  <div><label for="id">Course code or maker Network ID</label><input id="id" class="field" name="id" value="{{.ID}}" maxlength="40" required autocomplete="off" placeholder="635C-0000-0045-AF89 or a Network ID"></div>
+  <div><label for="name">Your name</label><input id="name" class="field" name="name" value="{{.Name}}" maxlength="100" required autocomplete="name"></div>
+  <div><label for="contact">How we can reach you (email or other)</label><input id="contact" class="field" name="contact" value="{{.Contact}}" maxlength="200" required autocomplete="email"></div>
+  <div><label for="reason">Reason (optional)</label><textarea id="reason" class="field" name="reason" rows="4" maxlength="2000">{{.Reason}}</textarea></div>
+  <div class="hp" aria-hidden="true"><label for="website">Leave this empty</label><input id="website" class="field" name="website" tabindex="-1" autocomplete="off"></div>
+  <p class="hint">You can also write to <a href="mailto:{{.Email}}">{{.Email}}</a>.</p>
+  <div><button class="btn primary" type="submit">Hide it and send the request</button></div>
+</form>
+{{end}}
+{{end}}{{end}}

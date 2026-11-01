@@ -1,0 +1,26 @@
+{{define "content"}}{{with .Data}}
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/history">History</a></nav>
+<div class="page-head">
+  <h1>About the History archive</h1>
+  <p>Super Mario Maker for Wii U let players share courses from 2015. The History section keeps a record of what was shared, as a way of crediting the people who made it.</p>
+</div>
+<div class="prose card info">
+  <h2>What is shown</h2>
+  <p>For each archived course: its name, the maker's name and Network ID, the game style, difficulty, tag, stars, plays, clears, attempts, clear rate and upload date. The courses themselves were not saved, so none of them can be played yet. Nothing about where a maker lives is kept or shown.</p>
+  {{if .Sum.HasSource}}<p>The archive holds {{num .Sum.Courses}} courses by {{num .Sum.Makers}} makers. It was last loaded on {{stamp .Sum.Source.ImportedAt}}.</p>{{end}}
+
+  <h2 id="credits">Where it comes from</h2>
+  <p>The details were collected in 2018 by tachyo from the Super Mario Maker Bookmark website and published on the Internet Archive as <a href="https://archive.org/details/tachyo_SMMData" rel="noopener">SMMData</a>. The database is made available under the Open Database License (ODbL) 1.0. The item's licence file names the Open Database License and links the Database Contents License text, so OpenMaker applies the stricter ODbL: credit tachyo, say what was changed, and share any published database built from it under the same licence. This archive is shown as pages, not offered as a bulk download. The licence covers the collection only. The course names and the courses belong to their makers, and Super Mario Maker is a trademark of Nintendo.</p>
+  <p>Changes made here: course details were copied as they are, entries whose names match the word lists below are hidden, and the maker's country, which the source also holds, was left out.</p>
+
+  <h2>Name filter</h2>
+  <p>Course names and maker names are checked against word lists for {{range $i, $l := .Lists}}{{if $i}}, {{end}}{{$l.Name}}{{end}}, plus a short list of hate terms of our own. A match hides the entry; nothing is deleted, and a moderator can bring an entry back. The lists are the “List of Dirty, Naughty, Obscene, and Otherwise Bad Words” from <a href="https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words" rel="noopener">LDNOOBW</a>, licensed CC BY 4.0. A few entries that are ordinary words in course titles are left out so that clean courses stay visible.</p>
+
+  <h2 id="mine">This is mine</h2>
+  <p>If you made a course, find your maker page and press “This is mine”. If your OpenPak account is linked to the same Wii U Network ID, the claim is accepted at once and the page shows “Claimed by” with your name. If no link exists yet, a moderator checks the claim.</p>
+
+  <h2 id="remove">Remove this</h2>
+  <p>You can ask for any course or maker to be removed. <a href="/history/takedown">Send a removal request</a>. The entry is hidden the moment you send it. Takedowns are honoured within 48 hours. You can also write to <a href="mailto:{{$.Takedown}}">{{$.Takedown}}</a>.</p>
+</div>
+{{template "histactions" (act "course" "" "#mine")}}
+{{end}}{{end}}

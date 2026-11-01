@@ -1,0 +1,40 @@
+{{define "content"}}
+<div class="page-head">
+  <h1>History</h1>
+  <p>A record of Super Mario Maker courses that players shared on Wii U between 2015 and 2018: names, makers, stars, plays and clear rates. Every entry is credited to the person who made it.</p>
+</div>
+{{with .Data}}
+<div class="notice">
+  <p><strong>Archived, not playable yet.</strong> Only the details of these courses survive, not the courses themselves, so they cannot be downloaded or played here. They are shown as history and belong to their makers. <a href="/history/about">About this archive</a>.</p>
+</div>
+<form class="filters card" action="/history" method="get">
+  <div><label for="q">Search</label><input id="q" class="field" type="search" name="q" value="{{.Q}}" placeholder="Name, maker or code" maxlength="100"></div>
+  <div><label for="theme">Game style</label><select id="theme" class="field" name="theme">
+    <option value="">All styles</option>
+    {{$t := .Theme}}{{range .Themes}}<option value="{{.}}" {{if eq . $t}}selected{{end}}>{{theme .}}</option>{{end}}</select></div>
+  <div><label for="year">Year</label><select id="year" class="field" name="year">
+    <option value="">All years</option>
+    {{$y := .Year}}{{range .Years}}<option value="{{.}}" {{if eq . $y}}selected{{end}}>{{.}}</option>{{end}}</select></div>
+  <div><label for="sort">Sort by</label><select id="sort" class="field" name="sort">
+    <option value="stars" {{if eq .Sort "stars"}}selected{{end}}>Most stars</option>
+    <option value="plays" {{if eq .Sort "plays"}}selected{{end}}>Most plays</option>
+    <option value="rate" {{if eq .Sort "rate"}}selected{{end}}>Highest clear rate (100+ attempts)</option>
+    <option value="hard" {{if eq .Sort "hard"}}selected{{end}}>Lowest clear rate (100+ attempts)</option>
+    <option value="newest" {{if eq .Sort "newest"}}selected{{end}}>Newest</option></select></div>
+  <button type="submit" class="btn primary">Search</button>
+</form>
+<p class="hint" role="status">{{num .Total}} archived course{{if ne .Total 1}}s{{end}}{{if .Q}} matching “{{.Q}}”{{end}}{{if not .Q}}{{if .Sum.Makers}} by {{num .Sum.Makers}} makers{{end}}{{end}}</p>
+{{if .Courses}}
+<ul class="grid">{{range .Courses}}{{template "acard" .}}{{end}}</ul>
+<nav class="pager" aria-label="Pages">
+  {{if .PrevURL}}<a class="btn" rel="prev" href="{{.PrevURL}}">Previous</a>{{else}}<span class="btn off" aria-disabled="true">Previous</span>{{end}}
+  <span>Page {{.Page}} of {{.Pages}}</span>
+  {{if .NextURL}}<a class="btn" rel="next" href="{{.NextURL}}">Next</a>{{else}}<span class="btn off" aria-disabled="true">Next</span>{{end}}
+</nav>
+{{else}}
+<div class="notice"><p>{{if .Q}}No archived course matches “{{.Q}}”. Try fewer words, a maker's Network ID, or a full course code.{{else}}No archived courses match these filters.{{end}}</p></div>
+{{end}}
+{{if .Sum.HasSource}}<p class="hint credit">Course details come from <a href="{{.Sum.Source.URL}}" rel="noopener">SMMData by tachyo</a> on the Internet Archive, under the {{.Sum.Source.Licence}}. <a href="/history/about">Credits and licences</a></p>{{end}}
+{{end}}
+{{template "histactions" (act "course" "" "/history/about#mine")}}
+{{end}}

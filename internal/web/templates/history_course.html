@@ -1,0 +1,23 @@
+{{define "content"}}{{with .Data}}{{$c := .C}}
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/history">History</a></nav>
+<article class="card info hist">
+  <p class="badges"><span class="badge soft"><span>Archived · originally by {{if .HasMaker}}<a href="/history/maker/{{$c.MakerID}}">{{if $c.MakerName}}{{$c.MakerName}}{{else}}{{$c.MakerID}}{{end}}</a>{{else if $c.MakerName}}{{$c.MakerName}}{{else}}an unknown maker{{end}}</span></span>
+  <span class="badge warn">Not playable yet</span></p>
+  <h1>{{if $c.Name}}{{$c.Name}}{{else}}Untitled course{{end}}</h1>
+  <p class="idline"><span class="label">Course code</span> <code class="copy" title="Click to select, then copy">{{$c.ID}}</code></p>
+  {{if $c.MakerClaim}}<p class="by">Maker profile claimed by {{$c.MakerClaim}}.</p>{{end}}
+  <dl class="facts">
+    <div><dt>Game style</dt><dd>{{theme $c.Theme}}</dd></div>
+    {{if $c.Difficulty}}<div><dt>Difficulty</dt><dd>{{$c.Difficulty}}</dd></div>{{end}}
+    {{if $c.Tag}}<div><dt>Tag</dt><dd>{{$c.Tag}}</dd></div>{{end}}
+    <div><dt>Stars</dt><dd>{{num $c.Stars}}</dd></div>
+    <div><dt>Plays</dt><dd>{{num $c.Plays}}</dd></div>
+    <div><dt>Clears</dt><dd>{{num $c.Clears}}</dd></div>
+    <div><dt>Attempts</dt><dd>{{num $c.Attempts}}</dd></div>
+    <div><dt>Clear rate</dt><dd>{{.Rate}}</dd></div>
+    <div><dt>Uploaded</dt><dd>{{date $c.Created}}</dd></div>
+  </dl>
+  <p class="hint">This is a record of a course shared on Super Mario Maker for Wii U. The course itself was not saved, so it cannot be played yet. The numbers are as they stood when the archive was taken, between 2015 and 2018. <a href="/history/about">About this archive</a></p>
+</article>
+{{template "histactions" (act "course" $c.ID (printf "/history/maker/%s#claim" $c.MakerID))}}
+{{end}}{{end}}

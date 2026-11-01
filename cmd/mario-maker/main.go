@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/openpak/mario-maker/internal/archive"
 	"github.com/openpak/mario-maker/internal/auth"
 	"github.com/openpak/mario-maker/internal/link"
 	"github.com/openpak/mario-maker/internal/model"
@@ -46,10 +47,43 @@ func envDur(log *slog.Logger, k string, def time.Duration) time.Duration {
 
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stderr, nil))
+	if len(os.Args) > 1 {
+		if err := command(log, os.Args[1:]); err != nil {
+			log.Error("fatal", "err", err)
+			os.Exit(1)
+		}
+		return
+	}
 	if err := run(log); err != nil {
 		log.Error("fatal", "err", err)
 		os.Exit(1)
 	}
+}
+
+// command runs a one-off job instead of the server: "import-archive <SMMData tar.gz or SMM.db>".
+func command(log *slog.Logger, args []string) error {
+	if args[0] != "import-archive" || len(args) != 2 {
+		return errors.New("usage: mario-maker [import-archive <SMMData-*.tar.gz | SMM.db>]")
+	}
+	dsn := os.Getenv("MARIO_MAKER_DATABASE_URL")
+	if dsn == "" {
+		return errors.New("MARIO_MAKER_DATABASE_URL is required")
+	}
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	st, err := openStore(ctx, dsn, log)
+	if err != nil {
+		return err
+	}
+	defer st.Close()
+	start := time.Now()
+	res, err := archive.Run(ctx, st, args[1], archive.Options{Log: log})
+	if err != nil {
+		return err
+	}
+	log.Info("archive import done", "courses", res.Courses, "makers", res.Makers, "filtered_courses", res.FilteredCourses,
+		"filtered_makers", res.FilteredMakers, "hidden_courses", res.Hidden.Courses, "hidden_makers", res.Hidden.Makers, "took", time.Since(start).Round(time.Second).String())
+	return nil
 }
 
 func run(log *slog.Logger) error {
@@ -91,9 +125,10 @@ func run(log *slog.Logger) error {
 			InternalURL: os.Getenv("MARIO_MAKER_SSO_URL"), Secret: os.Getenv("SSO_CLIENT_OPENMAKER_SECRET"),
 			SessionKey: os.Getenv("MARIO_MAKER_SESSION_KEY"), Log: log}),
 		Link: linkResolver(), SessionCookie: auth.CookieName, CSRFSecret: os.Getenv("MARIO_MAKER_CSRF_SECRET"),
-		PublicURL:  os.Getenv("MARIO_MAKER_PUBLIC_URL"),
-		WebsiteURL: os.Getenv("MARIO_MAKER_WEBSITE_URL"),
-		CacheDir:   os.Getenv("MARIO_MAKER_CACHE_DIR"), CacheMB: mb, Log: log,
+		PublicURL:     os.Getenv("MARIO_MAKER_PUBLIC_URL"),
+		WebsiteURL:    os.Getenv("MARIO_MAKER_WEBSITE_URL"),
+		TakedownEmail: os.Getenv("MARIO_MAKER_TAKEDOWN_EMAIL"), AdminKey: os.Getenv("MARIO_MAKER_ADMIN_KEY"),
+		CacheDir: os.Getenv("MARIO_MAKER_CACHE_DIR"), CacheMB: mb, Log: log,
 		SyncStatus: func() any { return sy.Statuses() },
 	})
 	if err != nil {

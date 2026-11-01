@@ -60,7 +60,10 @@ CREATE TABLE IF NOT EXISTS makers (
 `
 
 // Store wraps the pool.
-type Store struct{ pool *pgxpool.Pool }
+type Store struct {
+	pool *pgxpool.Pool
+	sum  summaryCache // History landing numbers
+}
 
 // Open connects and creates the schema (idempotent, serialized by an advisory lock).
 func Open(ctx context.Context, dsn string) (*Store, error) {
@@ -95,7 +98,10 @@ func (s *Store) migrate(ctx context.Context) error {
 		return err
 	}
 	defer conn.Exec(context.Background(), `SELECT pg_advisory_unlock(727301)`)
-	_, err = conn.Exec(ctx, schema)
+	if _, err = conn.Exec(ctx, schema); err != nil {
+		return err
+	}
+	_, err = conn.Exec(ctx, archiveSchema)
 	return err
 }
 

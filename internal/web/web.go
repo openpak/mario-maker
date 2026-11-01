@@ -49,6 +49,8 @@ type Config struct {
 	CSRFSecret    string                      // optional fixed key for bookmark tokens; random per start when empty
 	PublicURL     string                      // absolute base for OG tags; derived from the request when empty
 	WebsiteURL    string                      // openpak.org, for the sign-in and account links
+	TakedownEmail string                      // public contact for History takedowns; defaults to takedown@openpak.org
+	AdminKey      string                      // protects /admin/archive (HTTP Basic, any user name); empty turns the admin page off
 	CacheDir      string
 	CacheMB       int
 	Log           *slog.Logger
@@ -62,6 +64,7 @@ type Server struct {
 	thumbs  *thumbCache
 	csrfKey []byte
 	asset   string
+	limit   *rateLimit
 }
 
 // New parses the templates and builds the server.
@@ -72,7 +75,10 @@ func New(cfg Config) (*Server, error) {
 	if cfg.CacheMB <= 0 {
 		cfg.CacheMB = 64
 	}
-	s := &Server{cfg: cfg, csrfKey: newCSRFKey(cfg.CSRFSecret), pages: map[string]*template.Template{}, thumbs: newThumbCache(cfg.CacheDir, cfg.CacheMB<<20), asset: strconv.FormatInt(time.Now().Unix(), 36)}
+	if cfg.TakedownEmail == "" {
+		cfg.TakedownEmail = "takedown@openpak.org"
+	}
+	s := &Server{cfg: cfg, limit: newRateLimit(8, time.Hour), csrfKey: newCSRFKey(cfg.CSRFSecret), pages: map[string]*template.Template{}, thumbs: newThumbCache(cfg.CacheDir, cfg.CacheMB<<20), asset: strconv.FormatInt(time.Now().Unix(), 36)}
 	funcs := template.FuncMap{
 		"num":       num,
 		"date":      fmtDate,
@@ -83,6 +89,19 @@ func New(cfg Config) (*Server, error) {
 		"thumb":     thumbPath,
 		"add":       func(a, b int) int { return a + b },
 		"sub":       func(a, b int) int { return a - b },
+		"pct":       func(f float64) string { return fmtRate(f) },
+		"act": func(kind, id, mine string) map[string]string {
+			return map[string]string{"Kind": kind, "ID": id, "Mine": mine, "Remove": "/history/takedown?kind=" + url.QueryEscape(kind) + "&id=" + url.QueryEscape(id)}
+		},
+		"theme": themeName,
+		"arate": func(c store.ArchiveCourse) string {
+			if c.Attempts <= 0 {
+				return "n/a"
+			}
+			return fmtRate(c.ClearRate)
+		},
+		"hasPrefix": strings.HasPrefix,
+		"stamp":     func(t time.Time) string { return t.UTC().Format("2 Jan 2006 15:04 UTC") },
 	}
 	names, err := fs.Glob(templateFS, "templates/*.html")
 	if err != nil {
@@ -114,10 +133,11 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /maker/{game}/{id}", s.maker)
 	mux.HandleFunc("GET /thumb/{game}/{file}", s.thumb)
 	s.bookmarkRoutes(mux)
+	s.historyRoutes(mux)
 	s.cfg.Auth.Routes(mux, s.signInFailed)
 	mux.HandleFunc("GET /robots.txt", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		fmt.Fprint(w, "User-agent: *\nAllow: /\n")
+		fmt.Fprint(w, "User-agent: *\nAllow: /\nDisallow: /history/course/\nDisallow: /history/maker/\nDisallow: /admin/\n")
 	})
 	return secure(mux)
 }
@@ -151,6 +171,8 @@ type page struct {
 	Canonical  string
 	OGImage    string
 	OGType     string
+	NoIndex    bool
+	Takedown   string // public contact address for removal requests
 	Data       any
 }
 
@@ -170,6 +192,7 @@ func (s *Server) render(w http.ResponseWriter, r *http.Request, name string, sta
 	p.AuthOn = s.cfg.Auth != nil
 	p.User = s.cfg.Auth.User(r)
 	p.WebsiteURL = strings.TrimRight(s.cfg.WebsiteURL, "/")
+	p.Takedown = s.cfg.TakedownEmail
 	if p.OGType == "" {
 		p.OGType = "website"
 	}

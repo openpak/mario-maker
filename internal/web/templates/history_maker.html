@@ -1,0 +1,37 @@
+{{define "content"}}{{with .Data}}{{$m := .M}}
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/history">History</a></nav>
+<div class="page-head">
+  <p class="badges"><span class="badge soft">Archived maker</span> <span class="badge warn">Courses not playable yet</span></p>
+  <h1>{{if $m.Name}}{{$m.Name}}{{else}}{{$m.ID}}{{end}}</h1>
+  <p class="idline"><span class="label">Network ID</span> <code class="copy" title="Click to select, then copy">{{$m.ID}}</code></p>
+  {{with $m.Claim}}<p class="by claimed">Claimed by {{.AccountName}}</p>{{end}}
+</div>
+<dl class="facts card info">
+  <div><dt>Archived courses</dt><dd>{{num $m.Courses}}</dd></div>
+  <div><dt>Stars received</dt><dd>{{num $m.Stars}}</dd></div>
+  <div><dt>Plays</dt><dd>{{num $m.Plays}}</dd></div>
+</dl>
+<h2>Courses</h2>
+{{if .Courses}}<ul class="grid">{{range .Courses}}{{template "acard" .}}{{end}}</ul>
+{{if gt .Total (len .Courses)}}<p class="hint">Showing {{len .Courses}} of {{num .Total}}, most starred first.</p>{{end}}
+{{else}}<div class="notice"><p>No archived courses are shown for this maker.</p></div>{{end}}
+
+<section id="claim" class="card info claim">
+  <h2>Is this your profile?</h2>
+  {{with .Claim}}
+  {{if eq .State "mine"}}<p>You have claimed this profile. It shows “Claimed by” with your OpenPak display name.</p>
+  {{else if eq .State "claimed"}}<p>This profile has been claimed by {{$m.Claim.AccountName}}.</p>
+  {{else if eq .State "pending"}}<p>Your claim is waiting for a moderator to check it. You do not need to do anything else.</p>
+  {{else if eq .State "ready"}}<p>If this Network ID is yours, claim it. If your OpenPak account is linked to the same Wii U Network ID, the claim is accepted straight away. Otherwise a moderator checks it first.</p>
+  <form method="post" action="/history/maker/{{$m.ID}}/claim" class="stack">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <div><label for="note">Anything that helps us check it (optional)</label><input id="note" class="field" name="note" maxlength="500"></div>
+    <button class="btn primary" type="submit">This is mine: claim it</button>
+  </form>
+  {{else if eq .State "signin"}}<p>Sign in with your OpenPak account to claim this Network ID.</p>
+  <p><a class="btn primary" href="/auth/login?next=/history/maker/{{$m.ID}}">Sign in to claim</a></p>
+  {{else}}<p>To claim this profile, write to <a href="mailto:{{$.Takedown}}">{{$.Takedown}}</a> with your Network ID.</p>{{end}}
+  {{end}}
+</section>
+{{template "histactions" (act "maker" $m.ID "#claim")}}
+{{end}}{{end}}

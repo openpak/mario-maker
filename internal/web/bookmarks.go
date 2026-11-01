@@ -35,18 +35,23 @@ func (s *Server) bookmarkEnabled() bool {
 }
 
 // csrfToken ties a form to the session cookie it was rendered for.
-func (s *Server) csrfToken(r *http.Request) string {
+func (s *Server) csrfToken(r *http.Request) string { return s.csrfFor(r, "bookmark") }
+
+// csrfFor is csrfToken for another form family (claims).
+func (s *Server) csrfFor(r *http.Request, purpose string) string {
 	ck, err := r.Cookie(s.cfg.SessionCookie)
 	if err != nil || ck.Value == "" {
 		return ""
 	}
 	m := hmac.New(sha256.New, s.csrfKey)
-	m.Write([]byte("bookmark\x00" + ck.Value))
+	m.Write([]byte(purpose + "\x00" + ck.Value))
 	return hex.EncodeToString(m.Sum(nil))
 }
 
-func (s *Server) csrfOK(r *http.Request) bool {
-	want := s.csrfToken(r)
+func (s *Server) csrfOK(r *http.Request) bool { return s.csrfOKFor(r, "bookmark") }
+
+func (s *Server) csrfOKFor(r *http.Request, purpose string) bool {
+	want := s.csrfFor(r, purpose)
 	got := r.PostFormValue("csrf")
 	return want != "" && hmac.Equal([]byte(want), []byte(got))
 }

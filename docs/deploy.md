@@ -52,3 +52,16 @@ the owner. It is a host service rather than a quadlet because the container keyr
 `openpak-mario-maker.container.pending` next to the binary. The site reaches Postgres (database
 `mario_maker`) and the Super Mario Maker (Wii U) API through `openpak-switch-bridge` on loopback
 (19432, 19584) and the SMM2 API on `127.0.0.1:22333`.
+
+## History import (2026-11-01)
+
+The History section needs a one-off data load. Download the item (about 94 MB), then run the image once against the
+same database and env:
+
+```sh
+podman run --rm --network openpak.network --env-file ~/openpak/deploy/.env --env-file ~/openpak/deploy/mario-maker.env \
+  -e TMPDIR=/app/cache -v ~/openpak/deploy/smm-import:/import:ro,Z ghcr.io/openpak/mario-maker:latest \
+  /app/mario-maker import-archive /import/SMMData.tar.gz
+```
+
+Safe to repeat. See `history.md`. Settings: `MARIO_MAKER_ADMIN_KEY` (admin page), `MARIO_MAKER_TAKEDOWN_EMAIL`.

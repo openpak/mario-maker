@@ -1,5 +1,14 @@
 # Changelog: mario-maker
 
+## v0.3.0 — 2026-11-01
+
+- New History section (`/history`): archived Wii U Super Mario Maker course details from tachyo's 2018 scrape (archive.org `tachyo_SMMData`, ODbL), browse-only and credited to the makers. Browse and search by name, maker, course code, game style and year; sort by stars, plays or clear rate. Course and maker pages, an About page with the licences and credits, and "This is mine" and "Remove this" on every page. Country is never imported or shown
+- `mario-maker import-archive <tar.gz|SMM.db>`: idempotent import into separate `archive_*` tables, with the source and import date stored
+- Word filter for course names and maker names (English, Japanese, Spanish, French, German; LDNOOBW lists, CC BY 4.0) that hides rows without deleting them, plus an admin override list
+- Takedown form that hides the item at once and stores the request (honoured within 48 hours), with `/admin/archive` behind `MARIO_MAKER_ADMIN_KEY`
+- Maker claims by signed-in users: accepted at once when the account's linked Network ID matches, otherwise pending for a moderator
+- New settings: `MARIO_MAKER_TAKEDOWN_EMAIL`, `MARIO_MAKER_ADMIN_KEY`
+
 ## v0.2.1 — 2026-11-01
 
 - Sign out ends only this site's session and returns to the home page; it no longer goes through openpak.org's "Sign out of OpenPak?" page, and openpak.org stays signed in. The next Sign in may sign straight back in while openpak.org is signed in
