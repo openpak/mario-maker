@@ -65,8 +65,7 @@ A signed-in OpenPak user (SSO) can claim an archived maker. With `MARIO_MAKER_LI
 account-to-NNID resolver the bookmark feature uses) a claim whose NNID equals the linked Wii U Network ID is
 approved at once and shown as "Claimed by <display name>". A different linked NNID is refused. With no
 link, or no resolver, the claim is stored as `pending` with the account, display name and Wii U PID, for the
-admin page. One approved claim per maker. As of v0.3.0 nothing implements the resolver endpoint, so every
-claim waits for a moderator.
+admin page. One approved claim per maker. The resolver is nn-account's `GET /internal/wiiu-nnid?account_id=` (header `X-Internal-Key`), set up with `MARIO_MAKER_LINK_URL=http://openpak-nn-account:20050/internal/wiiu-nnid` and `MARIO_MAKER_LINK_KEY`. Caveat: OpenPak Network IDs are not Nintendo's; an account's NNID is derived from its handle, so a match proves only that the account holds that name here. Moderators can reject or revoke a claim.
 
 ## Pages
 
