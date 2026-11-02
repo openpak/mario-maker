@@ -42,7 +42,7 @@ MARIO_MAKER_DATABASE_URL=$MARIO_MAKER_TEST_DATABASE_URL SMM1_API_URL=http://127.
 `go test ./...` skips the database tests unless `MARIO_MAKER_TEST_DATABASE_URL` is set; each test
 works in its own throwaway schema.
 
-## Production (2026-11-01)
+## Production
 
 Runs on the primary as the user service `openpak-mario-maker.service` (binary extracted from the
 image into `~/openpak/deploy/mario-maker`, env in `mario-maker.env`), listening on
@@ -53,7 +53,7 @@ the owner. It is a host service rather than a quadlet because the container keyr
 `mario_maker`) and the Super Mario Maker (Wii U) API through `openpak-switch-bridge` on loopback
 (19432, 19584) and the SMM2 API on `127.0.0.1:22333`.
 
-## History import (2026-11-01)
+## History import
 
 The History section needs a one-off data load. Download the item (about 94 MB), then run the image once against the
 same database and env:

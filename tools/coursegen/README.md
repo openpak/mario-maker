@@ -5,10 +5,9 @@ castle, airship, water and ghost-house themes; easy, normal and expert bands) so
 Challenge (it needs at least 32 courses) have content from day one. Humans play-test them and keep the best 48.
 Nothing is published until it has been play-tested.
 
-## Status: NOT verified in the game
+## Limitations
 
-- The files follow the documented course format and parse with our parser, but **no Wii U or emulator has loaded
-  one yet**. Header fields documented as "unknown" are written as zero.
+- The files follow the documented course format and parse with our parser, but header fields documented as "unknown" are written as zero.
 - The DataStore object format (how the server stores a course, its `data_type`, `meta_binary`, thumbnails) is
   **unconfirmed**: nobody has captured a real upload on our server. The `import` command is therefore off by default
   and only stages a local bundle. It needs one real course from a Wii U first (see PLAYTEST.md).
