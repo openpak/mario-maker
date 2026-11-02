@@ -12,7 +12,7 @@ Licence: AGPL-3.0-only. Go, standard library plus `pgx/v5` (and a pure-Go SQLite
 - `/history`: archived Wii U courses (2015 to 2018) as credited, browse-only history, with takedown and claim paths ([docs/history.md](docs/history.md)).
 - Optional sign-in display with the OpenPak account, off unless configured.
 
-Docs: [architecture](docs/architecture.md), [deploy](docs/deploy.md), [API contract](docs/api-contract.md).
+Docs: [architecture](docs/architecture.md), [deploy](docs/deploy.md), [API contract](docs/api-contract.md), [history](docs/history.md).
 
 ## Run
 
