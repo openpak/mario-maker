@@ -1,5 +1,12 @@
 # Changelog: mario-maker
 
+## v0.4.0 — 2026-11-04
+
+- Account erasure (card #120): `DELETE /internal/accounts/{account_id}/data` with `Authorization: Bearer $ACCOUNT_ERASE_KEY` on its own listener `ERASE_ADDR` (default `:9099`, container network only; the public site listener never serves it). Unset key = 503, bad key = 401, non-UUID = 400. Reply `{"service":"mario-maker","rows":N}`, one `account erased` log line.
+- Erased: the account's History claims (account id, name, Wii U PID, linked NNID, note), pending and approved. Approving one earlier no longer shows "claimed by" on the archived maker.
+- Published courses are kept, credited to "Deleted user" (the Mario Maker course is content others play, bookmark and rate; this is the mods-service pattern, and the courses live on in the title servers anyway). The account's Wii U link (`MARIO_MAKER_LINK_URL`: NNID and PID) names its maker ids; every live maker whose id equals one (case-insensitive) is recorded in `erased_makers`, its courses get maker id `deleted` and name "Deleted user", its maker row is removed, and the syncer re-applies this after every upsert so upstream cannot restore the credit. Without the link service only claims are found.
+- Kept: the History archive (third-party scrape of public courses, takedown route exists), takedown requests (filed by name and contact, not by account).
+
 ## v0.3.8 — 2026-11-04
 
 - Phones: the game tab row (All games, SMM1, SMM2) becomes one native dropdown when it does not fit on a line, with the counts in the labels. Pills stay on desktop and without JavaScript. New `static/pillselect.js`; the CSP now allows scripts from the site itself.

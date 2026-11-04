@@ -65,3 +65,7 @@ podman run --rm --network openpak.network --env-file ~/openpak/deploy/.env --env
 ```
 
 Safe to repeat. See `history.md`. Settings: `MARIO_MAKER_ADMIN_KEY` (admin page), `MARIO_MAKER_TAKEDOWN_EMAIL`.
+
+## Account erasure (card #120)
+
+`DELETE http://openpak-mario-maker:9099/internal/accounts/{account_id}/data`, `Authorization: Bearer <ACCOUNT_ERASE_KEY>` (shared key; unset = 503). Listener `ERASE_ADDR` (default `:9099`) on the container network, not published. Erases the account's History claims; credits its published courses to "Deleted user" (courses stay, identity goes) using the Wii U NNID and PID from `MARIO_MAKER_LINK_URL`. Super Mario Maker 2 maker codes cannot be derived from the links, so SMM2 credits follow what the title server reports; anonymise them there. Idempotent; second call returns 0 rows.

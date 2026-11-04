@@ -101,7 +101,10 @@ func (s *Store) migrate(ctx context.Context) error {
 	if _, err = conn.Exec(ctx, schema); err != nil {
 		return err
 	}
-	_, err = conn.Exec(ctx, archiveSchema)
+	if _, err = conn.Exec(ctx, archiveSchema); err != nil {
+		return err
+	}
+	_, err = conn.Exec(ctx, eraseSchema)
 	return err
 }
 
@@ -145,13 +148,17 @@ ON CONFLICT (game, course_id) DO UPDATE SET data_id=EXCLUDED.data_id, name=EXCLU
 			tags, nullTime(c.Created), nullTime(c.Updated), c.Stars, c.Plays, c.Clears, c.Attempts, c.HasThumbnail, searchText(c))
 	}
 	res := s.pool.SendBatch(ctx, b)
-	defer res.Close()
 	for range cs {
 		if _, err := res.Exec(); err != nil {
+			res.Close()
 			return err
 		}
 	}
-	return nil
+	if err := res.Close(); err != nil {
+		return err
+	}
+	_, err := s.scrubErased(ctx) // an erased maker's credit never comes back from upstream
+	return err
 }
 
 // UpsertMakers stores makers seen upstream.
@@ -168,13 +175,17 @@ ON CONFLICT (game, maker_id) DO UPDATE SET name=EXCLUDED.name, courses=EXCLUDED.
 			m.Game, m.ID, m.Name, m.Courses, m.Stars, m.Plays, nullTime(m.Created))
 	}
 	res := s.pool.SendBatch(ctx, b)
-	defer res.Close()
 	for range ms {
 		if _, err := res.Exec(); err != nil {
+			res.Close()
 			return err
 		}
 	}
-	return nil
+	if err := res.Close(); err != nil {
+		return err
+	}
+	_, err := s.scrubErased(ctx)
+	return err
 }
 
 // UnseenIDs returns live course ids of a game not refreshed since t: the

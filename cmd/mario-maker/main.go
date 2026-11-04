@@ -17,6 +17,7 @@ import (
 
 	"github.com/openpak/mario-maker/internal/archive"
 	"github.com/openpak/mario-maker/internal/auth"
+	"github.com/openpak/mario-maker/internal/erase"
 	"github.com/openpak/mario-maker/internal/link"
 	"github.com/openpak/mario-maker/internal/model"
 	"github.com/openpak/mario-maker/internal/store"
@@ -142,7 +143,14 @@ func run(log *slog.Logger) error {
 		defer cancel()
 		_ = hs.Shutdown(sctx)
 	}()
-	log.Info("listening", "addr", hs.Addr, "games", len(list))
+	es := &http.Server{Addr: env("ERASE_ADDR", ":9099"), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 30 * time.Second, WriteTimeout: 60 * time.Second,
+		Handler: (&erase.Service{Store: st, Link: linkResolver(), Key: os.Getenv("ACCOUNT_ERASE_KEY"), Log: log}).Handler()}
+	go func() { // account erasure (card #120): own listener, never published to the host
+		if err := es.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Error("erase listener", "err", err)
+		}
+	}()
+	log.Info("listening", "addr", hs.Addr, "erase", es.Addr, "games", len(list))
 	if err := hs.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("http: %w", err)
 	}
