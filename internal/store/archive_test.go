@@ -196,7 +196,10 @@ func TestClaims(t *testing.T) {
 	st := testutil.DB(t)
 	seedArchive(t, st)
 	ctx := context.Background()
-	k, err := st.AddClaim(ctx, store.ArchiveClaim{MakerID: "Mia", AccountID: "a1", AccountName: "Tobi", Status: "pending"})
+	if err := st.SetMakerPID(ctx, "Mia", 1800000007); err != nil {
+		t.Fatal(err)
+	}
+	k, err := st.AddClaim(ctx, store.ArchiveClaim{MakerID: "Mia", AccountID: "a1", AccountName: "Tobi", WiiUPID: 1800000007, Status: "pending"})
 	if err != nil || k.Status != "pending" {
 		t.Fatalf("claim: %+v %v", k, err)
 	}

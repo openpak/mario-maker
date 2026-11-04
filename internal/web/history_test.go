@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"context"
+	"errors"
 	"io"
 	"log/slog"
 	"net/http"
@@ -273,16 +274,29 @@ func TestAdminArchive(t *testing.T) {
 
 func TestClaimFlow(t *testing.T) {
 	st := seedHistory(t)
+	ctx := context.Background()
+	const uploaderPID = 1800000001
+	if err := st.SetMakerPID(ctx, "mia_99", uploaderPID); err != nil {
+		t.Fatal(err)
+	}
+	// a maker the archive records no uploader PID for
+	if err := st.UpsertArchive(ctx, []store.ArchiveMaker{{ID: "nopid_1", Name: "No Pid", Source: archive.SourceID, ImportedAt: time.Now()}}, nil); err != nil {
+		t.Fatal(err)
+	}
 	au := auth.New(auth.Config{PublicURL: "https://maker.test", InternalURL: "http://unused.test", Secret: "s", SessionKey: strings.Repeat("k", 32)})
 	ck := func(id, name string, pid int64) string {
 		return au.SessionCookie(auth.User{ID: id, DisplayName: name, WiiUPID: pid}).String()
 	}
 	links := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Query().Get("account_id") {
-		case "linked":
-			io.WriteString(w, `{"nnid":"MIA_99"}`)
-		case "other":
-			io.WriteString(w, `{"nnid":"someone_else"}`)
+		case "linked": // the real uploader's account: the PID matches, the name does not have to
+			io.WriteString(w, `{"nnid":"Whatever_Name","pid":1800000001}`)
+		case "squatter": // registered the handle of the archived maker, another PID
+			io.WriteString(w, `{"nnid":"MIA_99","pid":1800000999}`)
+		case "namelink": // an old link answer with a name and no PID
+			io.WriteString(w, `{"nnid":"mia_99"}`)
+		case "down":
+			http.Error(w, "boom", http.StatusInternalServerError)
 		default:
 			http.NotFound(w, r)
 		}
@@ -303,8 +317,18 @@ func TestClaimFlow(t *testing.T) {
 		}
 		return m[1]
 	}
+	claim := func(cookie string) (int, string) {
+		code, body, _ := post(h, mk+"/claim", url.Values{"csrf": {token(cookie)}}, "Cookie", cookie)
+		return code, body
+	}
+	noClaims := func(why string) {
+		t.Helper()
+		if cl, _ := st.Claims(ctx, "", 10); len(cl) != 0 {
+			t.Fatalf("%s: a claim was stored: %+v", why, cl)
+		}
+	}
 	// a forged post is refused
-	pend := ck("nolink", "Wanda", 77)
+	pend := ck("nolink", "Wanda", 0)
 	if code, _, _ := post(h, mk+"/claim", url.Values{"csrf": {"bad"}}, "Cookie", pend); code != 403 {
 		t.Errorf("bad token: %d", code)
 	}
@@ -312,31 +336,45 @@ func TestClaimFlow(t *testing.T) {
 		t.Errorf("anonymous post: %d", code)
 	}
 
-	// no linked NNID: stored as pending for a moderator, not shown as claimed
-	if code, _, hd := post(h, mk+"/claim", url.Values{"csrf": {token(pend)}, "note": {"it is me"}}, "Cookie", pend); code != 303 || !strings.HasSuffix(hd.Get("Location"), "#claim") {
-		t.Fatalf("pending claim: %d %s", code, hd.Get("Location"))
+	// no Wii U linked: refused, nothing stored (a typed name or a note is not proof)
+	if code, body, _ := post(h, mk+"/claim", url.Values{"csrf": {token(pend)}, "note": {"it is me, mia_99"}}, "Cookie", pend); code != 409 || !strings.Contains(body, "no Wii U linked") {
+		t.Errorf("no link: %d", code)
 	}
-	_, body, _ := get(h, mk, "Cookie", pend)
-	if !strings.Contains(body, "waiting for a moderator") || strings.Contains(body, "Claimed by Wanda") {
-		t.Error("pending state")
-	}
-	if _, body, _ = get(h, mk); strings.Contains(body, "Claimed by") {
-		t.Error("pending must not show Claimed by")
-	}
-	cl, _ := st.Claims(context.Background(), "pending", 10)
-	if len(cl) != 1 || cl[0].AccountID != "nolink" || cl[0].WiiUPID != 77 || cl[0].Note != "it is me" || cl[0].Via != "moderator" {
-		t.Errorf("stored claim: %+v", cl)
-	}
+	noClaims("no link")
 
-	// linked to a different NNID: refused
-	other := ck("other", "Olga", 0)
-	if code, body, _ := post(h, mk+"/claim", url.Values{"csrf": {token(other)}}, "Cookie", other); code != 409 || !strings.Contains(body, "different one") {
-		t.Errorf("mismatch: %d", code)
+	// the loophole: an account whose handle equals the maker's Network ID but whose PID differs
+	squatter := ck("squatter", "MIA_99", 1800000999)
+	if code, body := claim(squatter); code != 409 || !strings.Contains(body, "not the one that uploaded") {
+		t.Errorf("handle squatter: %d", code)
 	}
+	// a link answer with a matching name and no PID proves nothing either
+	if code, _ := claim(ck("namelink", "mia_99", 0)); code != 409 {
+		t.Errorf("name without PID: %d", code)
+	}
+	// the session's own PID is never trusted over the link service
+	if code, _ := claim(ck("squatter", "MIA_99", uploaderPID)); code != 409 {
+		t.Errorf("forged session PID: %d", code)
+	}
+	noClaims("squatter")
 
-	// linked to this NNID (any case): approved at once, shown as Claimed by
+	// link service down: no guess, no claim
+	if code, _, _ := post(h, mk+"/claim", url.Values{"csrf": {token(ck("down", "D", 0))}}, "Cookie", ck("down", "D", 0)); code != 503 {
+		t.Errorf("link down: %d", code)
+	}
+	noClaims("link down")
+
+	// a maker with no recorded uploader PID cannot be claimed by anyone
+	if _, body, _ := get(h, "/history/maker/nopid_1", "Cookie", ck("linked", "Tobi", uploaderPID)); !strings.Contains(body, "cannot be claimed yet") || strings.Contains(body, `action="/history/maker/nopid_1/claim"`) {
+		t.Error("unverifiable maker offers a form")
+	}
+	if code, _, _ := post(h, "/history/maker/nopid_1/claim", url.Values{"csrf": {"x"}}, "Cookie", ck("linked", "Tobi", uploaderPID)); code == 303 {
+		t.Error("claim on a maker without PID accepted")
+	}
+	noClaims("no uploader PID")
+
+	// the uploader's own linked PID: approved at once, shown as Claimed by
 	good := ck("linked", "Tobi", 1)
-	if code, _, _ := post(h, mk+"/claim", url.Values{"csrf": {token(good)}}, "Cookie", good); code != 303 {
+	if code, _ := claim(good); code != 303 {
 		t.Fatalf("linked claim: %d", code)
 	}
 	for _, p := range []string{mk, "/history/course/AAAA-0000-0000-0001"} {
@@ -347,13 +385,61 @@ func TestClaimFlow(t *testing.T) {
 	if _, body, _ := get(h, mk, "Cookie", good); !strings.Contains(body, "You have claimed this profile") {
 		t.Error("claimant view")
 	}
-	// the maker is taken now; the pending claimant gets no form
+	cl, _ := st.Claims(ctx, "approved", 10)
+	if len(cl) != 1 || cl[0].AccountID != "linked" || cl[0].WiiUPID != uploaderPID || cl[0].Via != "link" {
+		t.Errorf("stored claim: %+v", cl)
+	}
+	// the maker is taken now; others get no form
 	if _, body, _ := get(h, mk, "Cookie", pend); strings.Contains(body, `action="/history/maker/mia_99/claim"`) {
 		t.Error("claimed maker still offers a form")
 	}
-	// a moderator approving the older pending claim must not make a second owner
-	if err := st.DecideClaim(context.Background(), cl[0].ID, "approved"); err == nil {
-		t.Error("second approval accepted")
+}
+
+func TestClaimsNeedThePID(t *testing.T) {
+	st := seedHistory(t)
+	ctx := context.Background()
+	if err := st.SetMakerPID(ctx, "mia_99", 1800000001); err != nil {
+		t.Fatal(err)
+	}
+	// the store itself refuses an approved claim the PIDs do not prove
+	bad := store.ArchiveClaim{MakerID: "mia_99", AccountID: "a1", AccountName: "A", WiiUPID: 1800000999, Status: "approved", Via: "link"}
+	if _, err := st.AddClaim(ctx, bad); !errors.Is(err, store.ErrClaimUnproven) {
+		t.Errorf("approved claim with a foreign PID: %v", err)
+	}
+	bad.WiiUPID = 0
+	if _, err := st.AddClaim(ctx, bad); !errors.Is(err, store.ErrClaimUnproven) {
+		t.Errorf("approved claim with no PID: %v", err)
+	}
+	// a pending claim (the old moderator path) cannot be approved by a moderator without proof...
+	bad.WiiUPID, bad.Status, bad.Via = 1800000999, "pending", "moderator"
+	k, err := st.AddClaim(ctx, bad)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := st.DecideClaim(ctx, k.ID, "approved"); !errors.Is(err, store.ErrClaimUnproven) {
+		t.Errorf("moderator approval without proof: %v", err)
+	}
+	// ...may be rejected, and an unknown claim is not found
+	if err := st.DecideClaim(ctx, k.ID, "rejected"); err != nil {
+		t.Errorf("reject: %v", err)
+	}
+	if err := st.DecideClaim(ctx, 99999, "approved"); !errors.Is(err, store.ErrNotFound) {
+		t.Errorf("unknown claim: %v", err)
+	}
+	// with the matching PID a pending claim can be approved, once
+	good := store.ArchiveClaim{MakerID: "mia_99", AccountID: "a2", AccountName: "B", WiiUPID: 1800000001, Status: "pending", Via: "moderator"}
+	g, err := st.AddClaim(ctx, good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := st.DecideClaim(ctx, g.ID, "approved"); err != nil {
+		t.Errorf("proven approval: %v", err)
+	}
+	if ok, _ := st.ClaimProven(ctx, "MIA_99", 1800000001); !ok {
+		t.Error("ClaimProven is case-insensitive on the Network ID")
+	}
+	if ok, _ := st.ClaimProven(ctx, "rudeman", 1800000001); ok {
+		t.Error("a maker without PID is never proven")
 	}
 }
 

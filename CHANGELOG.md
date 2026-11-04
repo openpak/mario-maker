@@ -1,6 +1,8 @@
 # Changelog: mario-maker
 
-## Unreleased
+## v0.3.7 — 2026-11-04
+
+- Phones: the game tab row (All games, SMM1, SMM2) becomes one native dropdown when it does not fit on a line, with the counts in the labels. Pills stay on desktop and without JavaScript. New `static/pillselect.js`; the CSP now allows scripts from the site itself.
 
 - `tools/coursegen`: generator, validator and review folder for about 60 OpenPak starter courses for Super Mario Maker (Wii U). Not part of the site binary. The files are not verified in the game and the DataStore import is off by default; see `tools/coursegen/README.md`
 

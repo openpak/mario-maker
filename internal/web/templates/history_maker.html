@@ -22,10 +22,11 @@
   {{if eq .State "mine"}}<p>You have claimed this profile. It shows “Claimed by” with your OpenPak display name.</p>
   {{else if eq .State "claimed"}}<p>This profile has been claimed by {{$m.Claim.AccountName}}.</p>
   {{else if eq .State "pending"}}<p>Your claim is waiting for a moderator to check it. You do not need to do anything else.</p>
-  {{else if eq .State "ready"}}<p>If this Network ID is yours, claim it. If your OpenPak account is linked to the same Wii U Network ID, the claim is accepted straight away. Otherwise a moderator checks it first.</p>
+  {{else if eq .State "unverifiable"}}<p>This profile cannot be claimed yet. The archive does not record the account ID of the player who uploaded these courses, and a name alone is not proof. If they are yours and you want them removed, use “Remove this” below.</p>
+  {{else if eq .State "ready"}}<p>If you uploaded these courses, claim them. The claim is accepted when the Wii U linked to your OpenPak account is the one that uploaded them. A name or Network ID typed in is never enough.</p>
   <form method="post" action="/history/maker/{{$m.ID}}/claim" class="stack">
     <input type="hidden" name="csrf" value="{{.CSRF}}">
-    <div><label for="note">Anything that helps us check it (optional)</label><input id="note" class="field" name="note" maxlength="500"></div>
+    <div><label for="note">A note (optional)</label><input id="note" class="field" name="note" maxlength="500"></div>
     <button class="btn primary" type="submit">This is mine: claim it</button>
   </form>
   {{else if eq .State "signin"}}<p>Sign in with your OpenPak account to claim this Network ID.</p>

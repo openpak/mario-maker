@@ -19,6 +19,15 @@ import (
 type Resolver interface {
 	// NNID returns the linked NNID, or "" when the account has none.
 	NNID(ctx context.Context, accountID string) (string, error)
+	// Identity returns the Wii U name and PID the core links tie to the account (zero values when
+	// it has none). The PID, not the name, is what proves a claim.
+	Identity(ctx context.Context, accountID string) (Identity, error)
+}
+
+// Identity is the Wii U identity of an OpenPak account, from the core links.
+type Identity struct {
+	NNID string
+	PID  int64
 }
 
 // HTTP asks GET {URL}?account_id=<id> with header X-Internal-Key, and expects {"nnid": "..."}
@@ -38,36 +47,47 @@ func New(rawURL, key string) *HTTP {
 
 // NNID implements Resolver.
 func (h *HTTP) NNID(ctx context.Context, accountID string) (string, error) {
+	id, err := h.Identity(ctx, accountID)
+	return id.NNID, err
+}
+
+// Identity implements Resolver: {"nnid": "...", "pid": 123}, 404 or empty for no link.
+func (h *HTTP) Identity(ctx context.Context, accountID string) (Identity, error) {
 	u, err := url.Parse(h.URL)
 	if err != nil {
-		return "", err
+		return Identity{}, err
 	}
 	q := u.Query()
 	q.Set("account_id", accountID)
 	u.RawQuery = q.Encode()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
-		return "", err
+		return Identity{}, err
 	}
 	if h.Key != "" {
 		req.Header.Set("X-Internal-Key", h.Key)
 	}
 	resp, err := h.Client.Do(req)
 	if err != nil {
-		return "", err
+		return Identity{}, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusNotFound {
-		return "", nil
+		return Identity{}, nil
 	}
 	if resp.StatusCode != http.StatusOK {
-		return "", io.ErrUnexpectedEOF
+		return Identity{}, io.ErrUnexpectedEOF
 	}
 	var body struct {
-		NNID string `json:"nnid"`
+		NNID string      `json:"nnid"`
+		PID  json.Number `json:"pid"`
 	}
 	if err := json.NewDecoder(io.LimitReader(resp.Body, 1<<16)).Decode(&body); err != nil {
-		return "", err
+		return Identity{}, err
 	}
-	return strings.TrimSpace(body.NNID), nil
+	pid, _ := body.PID.Int64()
+	if pid < 0 {
+		pid = 0
+	}
+	return Identity{NNID: strings.TrimSpace(body.NNID), PID: pid}, nil
 }

@@ -36,6 +36,8 @@ CREATE TABLE IF NOT EXISTS archive_makers (
   override    text        NOT NULL DEFAULT '',
   visible     boolean     NOT NULL DEFAULT true
 );
+-- The uploader's Wii U PID, 0 when the archive does not record it. Only a PID can prove a claim.
+ALTER TABLE archive_makers ADD COLUMN IF NOT EXISTS pid bigint NOT NULL DEFAULT 0;
 CREATE INDEX IF NOT EXISTS archive_makers_lower_idx ON archive_makers (lower(maker_id));
 CREATE TABLE IF NOT EXISTS archive_courses (
   course_id   text PRIMARY KEY,
@@ -112,7 +114,8 @@ type ArchiveMaker struct {
 	FilterLang, FilterTerm string
 	Override               string
 	Visible                bool
-	Courses, Stars, Plays  int // filled on read
+	PID                    int64 // the uploader's Wii U PID; 0 when the archive does not record it
+	Courses, Stars, Plays  int   // filled on read
 	Claim                  *ArchiveClaim
 }
 
@@ -328,12 +331,12 @@ LEFT JOIN archive_makers m ON m.maker_id=c.maker_id WHERE upper(c.course_id)=upp
 // ArchiveMaker returns one visible archived maker with totals over the visible courses.
 func (s *Store) ArchiveMaker(ctx context.Context, id string) (ArchiveMaker, error) {
 	var m ArchiveMaker
-	err := s.pool.QueryRow(ctx, `SELECT m.maker_id, m.name, m.source, m.imported_at, m.filter_lang, m.filter_term, m.override, m.visible,
+	err := s.pool.QueryRow(ctx, `SELECT m.maker_id, m.name, m.source, m.imported_at, m.filter_lang, m.filter_term, m.override, m.visible, m.pid,
   (SELECT count(*) FROM archive_courses c WHERE c.maker_id=m.maker_id AND c.visible),
   (SELECT COALESCE(sum(c.stars),0) FROM archive_courses c WHERE c.maker_id=m.maker_id AND c.visible),
   (SELECT COALESCE(sum(c.plays),0) FROM archive_courses c WHERE c.maker_id=m.maker_id AND c.visible)
 FROM archive_makers m WHERE lower(m.maker_id)=lower($1) AND m.visible`, id).
-		Scan(&m.ID, &m.Name, &m.Source, &m.ImportedAt, &m.FilterLang, &m.FilterTerm, &m.Override, &m.Visible, &m.Courses, &m.Stars, &m.Plays)
+		Scan(&m.ID, &m.Name, &m.Source, &m.ImportedAt, &m.FilterLang, &m.FilterTerm, &m.Override, &m.Visible, &m.PID, &m.Courses, &m.Stars, &m.Plays)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return m, ErrNotFound
 	}
@@ -612,6 +615,31 @@ func (s *Store) oneClaim(ctx context.Context, where string, args ...any) (Archiv
 	return k, err
 }
 
+// ErrClaimUnproven means the claim's account PID is not the maker's uploader PID (or the archive
+// records no uploader PID for the maker): nothing proves the claimant is that player.
+var ErrClaimUnproven = errors.New("store: claim not proven by the uploader PID")
+
+// SetMakerPID records the uploader's Wii U PID of an archived maker.
+func (s *Store) SetMakerPID(ctx context.Context, makerID string, pid int64) error {
+	tag, err := s.pool.Exec(ctx, `UPDATE archive_makers SET pid=$2 WHERE lower(maker_id)=lower($1)`, makerID, pid)
+	if err == nil && tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return err
+}
+
+// ClaimProven reports whether pid (the claimant's linked Wii U PID, from the core links) equals the
+// recorded uploader PID of the maker. A typed name or Network ID never counts; an unknown uploader
+// PID (0) proves nothing.
+func (s *Store) ClaimProven(ctx context.Context, makerID string, pid int64) (bool, error) {
+	if pid <= 0 {
+		return false, nil
+	}
+	var ok bool
+	err := s.pool.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM archive_makers WHERE lower(maker_id)=lower($1) AND pid>0 AND pid=$2)`, makerID, pid).Scan(&ok)
+	return ok, err
+}
+
 // ErrClaimTaken means the maker already has an approved claim by someone else.
 var ErrClaimTaken = errors.New("store: maker already claimed")
 
@@ -623,6 +651,13 @@ func (s *Store) AddClaim(ctx context.Context, k ArchiveClaim) (ArchiveClaim, err
 	}
 	if _, err := s.ApprovedClaim(ctx, k.MakerID); err == nil {
 		return k, ErrClaimTaken
+	}
+	if k.Status == "approved" {
+		if ok, err := s.ClaimProven(ctx, k.MakerID, k.WiiUPID); err != nil {
+			return k, err
+		} else if !ok {
+			return k, ErrClaimUnproven
+		}
 	}
 	got, err := scanClaim(s.pool.QueryRow(ctx, `INSERT INTO archive_claims (maker_id, account_id, account_name, wiiu_pid, linked_nnid, status, via, note, decided_at)
 VALUES ($1,$2,$3,$4,$5,$6,$7,$8, CASE WHEN $6='approved' THEN now() END) RETURNING `+claimCols,
@@ -656,6 +691,21 @@ ORDER BY (status='pending') DESC, created_at DESC LIMIT $2`, status, limit)
 func (s *Store) DecideClaim(ctx context.Context, id int64, status string) error {
 	if status != "approved" && status != "rejected" {
 		return fmt.Errorf("store: bad claim status %q", status)
+	}
+	if status == "approved" { // a moderator cannot approve what the PIDs do not prove
+		var ok bool
+		err := s.pool.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM archive_claims k JOIN archive_makers m ON lower(m.maker_id)=lower(k.maker_id)
+WHERE k.id=$1 AND m.pid>0 AND m.pid=k.wiiu_pid)`, id).Scan(&ok)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			var n int
+			if err := s.pool.QueryRow(ctx, `SELECT count(*) FROM archive_claims WHERE id=$1`, id).Scan(&n); err == nil && n == 0 {
+				return ErrNotFound
+			}
+			return ErrClaimUnproven
+		}
 	}
 	tag, err := s.pool.Exec(ctx, `UPDATE archive_claims SET status=$2, decided_at=now() WHERE id=$1`, id, status)
 	if err != nil {

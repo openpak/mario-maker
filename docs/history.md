@@ -61,11 +61,7 @@ takedowns, claims and the override list; every form carries a token.
 
 ## Claims
 
-A signed-in OpenPak user (SSO) can claim an archived maker. With `MARIO_MAKER_LINK_URL` set (the same
-account-to-NNID resolver the bookmark feature uses) a claim whose NNID equals the linked Wii U Network ID is
-approved at once and shown as "Claimed by <display name>". A different linked NNID is refused. With no
-link, or no resolver, the claim is stored as `pending` with the account, display name and Wii U PID, for the
-admin page. One approved claim per maker. The resolver is nn-account's `GET /internal/wiiu-nnid?account_id=` (header `X-Internal-Key`), set up with `MARIO_MAKER_LINK_URL=http://openpak-nn-account:20050/internal/wiiu-nnid` and `MARIO_MAKER_LINK_KEY`. Caveat: OpenPak Network IDs are not Nintendo's; an account's NNID is derived from its handle, so a match proves only that the account holds that name here. Moderators can reject or revoke a claim.
+A signed-in OpenPak user (SSO) can claim an archived maker, but only with proof from account identity. A claim is accepted when the claimant's linked Wii U PID, taken from the core links (`MARIO_MAKER_LINK_URL`, nn-account's `GET /internal/wiiu-nnid?account_id=` answering `{"nnid","pid"}`, header `X-Internal-Key`, with `MARIO_MAKER_LINK_KEY`), equals the uploader PID recorded for the maker (`archive_makers.pid`). A typed name, a handle, a Network ID or a note never counts: OpenPak handles are free to register, so matching names let anyone take another player's courses (the earlier NNID-equality rule, removed 2026-11-04, card prds#97). A maker with no recorded uploader PID (the 2018 archive has none; `Store.SetMakerPID` records one) cannot be claimed and its page says so. A mismatch, an account with no Wii U link, or a link service that does not answer refuses the claim and stores nothing. A moderator can reject a claim but cannot approve one the PIDs do not prove (`ErrClaimUnproven`). One approved claim per maker; moderators can reject or revoke a claim. Switch PIDs: the core link endpoint serves Wii U only, so the Switch side of the rule waits for an equivalent endpoint.
 
 ## Pages
 

@@ -239,6 +239,9 @@ func (s *Server) claimView(r *http.Request, m store.ArchiveMaker) claimView {
 	if s.cfg.Auth == nil {
 		return claimView{State: "off"}
 	}
+	if m.PID <= 0 { // no recorded uploader PID: no account can prove it is this player
+		return claimView{State: "unverifiable"}
+	}
 	u := s.cfg.Auth.User(r)
 	if u == nil {
 		return claimView{State: "signin"}
@@ -269,20 +272,39 @@ func (s *Server) historyClaim(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, r, err)
 		return
 	}
-	k := store.ArchiveClaim{MakerID: m.ID, AccountID: u.ID, AccountName: u.Name(), WiiUPID: u.WiiUPID, Status: "pending", Via: "moderator", Note: clip(r.PostFormValue("note"), 500)}
+	// A claim is proven by the claimant's linked Wii U PID (the core links) equalling the PID of
+	// the course's uploader. A typed name, a Network ID or a handle proves nothing: OpenPak
+	// handles are free to register, so a name match would hand anyone someone else's courses.
+	if m.PID <= 0 {
+		s.render(w, r, "error", http.StatusConflict, page{Title: "Cannot be claimed yet",
+			Data: "The archive does not record the account ID of this maker's uploader, so no account can prove it is theirs. Use Remove this on the maker page if you want it taken down."})
+		return
+	}
+	pid, nnid := u.WiiUPID, ""
 	if s.cfg.Link != nil {
-		nnid, err := s.cfg.Link.NNID(r.Context(), u.ID)
-		switch {
-		case err != nil:
-			s.cfg.Log.Warn("claim: link lookup", "err", err) // falls back to a moderator
-		case nnid != "" && strings.EqualFold(nnid, m.ID):
-			k.Status, k.Via, k.LinkedNNID = "approved", "link", nnid
-		case nnid != "":
-			s.render(w, r, "error", http.StatusConflict, page{Title: "Not your Network ID",
-				Data: "The Wii U Network ID linked to your OpenPak account is a different one, so this profile cannot be claimed with it."})
+		id, err := s.cfg.Link.Identity(r.Context(), u.ID)
+		if err != nil {
+			s.cfg.Log.Warn("claim: link lookup", "err", err)
+			http.Error(w, "the account link service is not answering; try again in a moment", http.StatusServiceUnavailable)
 			return
 		}
+		pid, nnid = id.PID, id.NNID
 	}
+	if pid <= 0 {
+		s.render(w, r, "error", http.StatusConflict, page{Title: "Link your Wii U first",
+			Data: "Your OpenPak account has no Wii U linked, so it cannot prove this profile is yours. Link your Wii U on openpak.org and try again."})
+		return
+	}
+	if ok, err := s.cfg.Store.ClaimProven(r.Context(), m.ID, pid); err != nil {
+		s.fail(w, r, err)
+		return
+	} else if !ok {
+		s.cfg.Log.Warn("claim refused: PID mismatch", "maker", m.ID, "account", u.ID)
+		s.render(w, r, "error", http.StatusConflict, page{Title: "Not your profile",
+			Data: "The Wii U linked to your OpenPak account is not the one that uploaded these courses, so this profile cannot be claimed with it."})
+		return
+	}
+	k := store.ArchiveClaim{MakerID: m.ID, AccountID: u.ID, AccountName: u.Name(), WiiUPID: pid, LinkedNNID: nnid, Status: "approved", Via: "link", Note: clip(r.PostFormValue("note"), 500)}
 	if _, err := s.cfg.Store.AddClaim(r.Context(), k); errors.Is(err, store.ErrClaimTaken) {
 		s.render(w, r, "error", http.StatusConflict, page{Title: "Already claimed",
 			Data: "Someone has already claimed this maker. If that is a mistake, use Remove this on the maker page or ask for its removal on the maker page."})
