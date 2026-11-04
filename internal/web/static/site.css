@@ -200,3 +200,18 @@ form.inline .btn { min-height: 36px; padding: 0 .8rem; font-size: .85rem; }
 .tile.arch .stats { margin-top: auto; padding-top: .5rem; flex-wrap: nowrap; gap: .8rem; font-size: .85rem; white-space: nowrap; }
 .pill { align-self: flex-start; display: inline-flex; white-space: nowrap; padding: .1rem .6rem; border-radius: 999px; border: 1px solid var(--accent-line); background: var(--accent-weak);
   color: var(--ink); font-family: var(--font-ui); font-size: .75rem; font-weight: 700; }
+
+/* Pill and tab rows (data-pillselect): when pillselect.js finds the row does not fit on one line it
+   adds .ps-on, the pills hide and one native select takes their place. Same height and radius as the
+   inputs, the cursor ring on focus. Desktop keeps the pills. */
+.ps-holder { display: none; }
+.ps-on > :not(.ps-holder):not(.ps-keep) { display: none !important; }
+.ps-on { -webkit-mask-image: none; mask-image: none; }
+.ps-on > .ps-holder { display: block; flex: 1 1 10rem; min-width: 0; list-style: none; }
+li.ps-holder { margin: 0; padding: 0; }
+.pillselect { width: 100%; min-height: 44px; margin: 0; padding: 0 2.4rem 0 1rem; font: inherit; font-family: var(--font-ui); font-weight: 700; font-size: max(1rem, 16px); color: var(--ink);
+  background-color: var(--paper-2); border: 1px solid var(--line-2, var(--line)); border-radius: 12px; cursor: pointer; text-overflow: ellipsis;
+  -webkit-appearance: none !important; appearance: none !important;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 20px) 55%, calc(100% - 15px) 55%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+.pillselect:focus, .pillselect:focus-visible { outline: none; border-color: var(--cursor); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cursor) 30%, transparent); }

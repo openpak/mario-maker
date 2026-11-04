@@ -4,7 +4,7 @@
   <p>OpenMaker is the course site for Super Mario Maker and Super Mario Maker 2 on OpenPak: courses uploaded by players, for Super Mario Maker on Wii U and Super Mario Maker 2 on Switch.</p>
 </div>
 {{with .Data}}
-<nav class="tabs" aria-label="Game">
+<nav class="tabs" aria-label="Game" data-pillselect>
   <a href="/" {{if eq .Game ""}}aria-current="page"{{end}}>All games</a>
   <a href="/?game=smm1" {{if eq .Game "smm1"}}aria-current="page"{{end}}>{{gameShort "smm1"}} <span class="count">{{num (index .Counts "smm1")}}</span></a>
   <a href="/?game=smm2" {{if eq .Game "smm2"}}aria-current="page"{{end}}>{{gameShort "smm2"}} <span class="count">{{num (index .Counts "smm2")}}</span></a>

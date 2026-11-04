@@ -1,5 +1,5 @@
 // Package web serves the course site: server-rendered html/template pages, embedded
-// static assets, and the thumbnail proxy. No page needs JavaScript.
+// static assets, and the thumbnail proxy. Every page works without JavaScript.
 package web
 
 import (
@@ -160,7 +160,7 @@ func secure(h http.Handler) http.Handler {
 		hd := w.Header()
 		hd.Set("X-Content-Type-Options", "nosniff")
 		hd.Set("Referrer-Policy", "strict-origin-when-cross-origin")
-		hd.Set("Content-Security-Policy", "default-src 'none'; img-src 'self' data:; style-src 'self'; font-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'")
+		hd.Set("Content-Security-Policy", "default-src 'none'; script-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'")
 		h.ServeHTTP(w, r)
 	})
 }
